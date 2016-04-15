@@ -1,0 +1,20 @@
+{
+  "name": "hand-trail",
+  "version": "1.0.0",
+  "description": "",
+  "main": "entry.js",
+  "scripts": {
+    "build": "webpack --progress --colors",
+    "dev-server": "node node_modules/webpack-dev-server/bin/webpack-dev-server.js --inline"
+  },
+  "repository": {
+    "type": "git",
+    "url": "root@8sai.co.jp:/var/git/hand-trail.git"
+  },
+  "author": "yanoy",
+  "license": "ISC",
+  "devDependencies": {
+    "webpack": "^1.13.0",
+    "webpack-dev-server": "^1.14.1"
+  }
+}
