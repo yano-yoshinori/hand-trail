@@ -1,0 +1,24 @@
+.editor {
+    border: 1px solid #888;
+    position: relative;
+}
+
+.tabs {
+    position: fixed;
+    top: 0;
+    right: 0;
+    z-index: 2;
+
+    .tab {
+        padding: 12px 4px;
+        background-color: #8c8;
+        border-radius: 6px 0 0 6px;
+        margin: 4px 0;
+
+        a {
+            text-decoration: initial;
+        }
+    }
+
+
+}

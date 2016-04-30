@@ -7,17 +7,15 @@ module.exports = {
         filename: "bundle.js"
     },
     module: {
-        // loaders: [
-        //     { test: /\.jade$/, loader: "jade" },
-        //     { test: /\.html$/, loader: "html" },
-        //     { test: /\.scss$/, loaders: ["style", "css", "sass"] },
+        loaders: [
+            { test: /\.scss$/, loaders: ["style", "css", "sass"] },
         //     { test: /\.js$/, exclude: /node_modules/, loader: "babel", query: {
         //         presets: ['es2015']
         //     }},
         //     { test: /\.jsx$/, exclude: /node_modules/, loader: "babel", query: {
         //         presets: ['react', 'es2015']
         //     }}
-        // ]
+        ]
     },
     resolve: {
         extensions: ['', '.jsx', '.js', '.json'],
