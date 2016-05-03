@@ -6,8 +6,9 @@
 // TODO テキスト入力枠の中にいるときは、documentのキーボードイベントを殺す
 // TODO 打ち間違いをバックスペースで消せるように。このときに文字枠の文字が選択されないように
 
-require('./core.scss');
-var Canvas = require('./Canvas.js');
+require('./core/base.scss');
+
+window.ht = {};
 
 var keycodes = {
     TAB: 9,
@@ -26,30 +27,15 @@ fabric.StaticCanvas.prototype._setImageSmoothing = function() {
     ctx.oImageSmoothingEnabled      = this.imageSmoothingEnabled;
 };
 
-var $document = $(document),
-    $canvas = $('.editor');
-
-$document.on('keydown', function (e) {
-    if (e.keyCode === keycodes.TAB || e.keyCode === keycodes.BACKSPACE) {
+$(document).on('keydown', function (e) {
+    if (_.includes([keycodes.TAB, keycodes.BACKSPACE, keycodes.SPACE], e.keyCode)) {
         e.preventDefault();
     }
 });
 
-$canvas.attr({
-    width: $document.width(),
-    height: $document.height()
-});
-
-$canvas.each((index, el) => {
-    new Canvas(el);
-
-    $(el).on('mouseover', () => {
-        console.log('enter');
-    });
-
-    $('.editor-outer').hover(() => {
-        console.log('in');
-    }, () => {
-        console.log('out');
-    });
-});
+var Root = require('./core/Root.jsx');
+var root = React.createElement(Root);
+ReactDOM.render(
+    root,
+    document.getElementsByClassName('root')[0]
+);

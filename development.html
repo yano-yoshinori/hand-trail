@@ -7,12 +7,15 @@
 
     <link href="/vendor/normalize.css" rel="stylesheet" />
     <link href="/vendor/font-awesome-4.5.0/css/font-awesome.css" rel="stylesheet" />
+    <link href="/node_modules/materialize-css/dist/css/materialize.css" rel="stylesheet" />
 
     <!--Let browser know website is optimized for mobile-->
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 </head>
 
 <body>
+
+    <div class="root"></div>
 
     <!-- <div class="tabs">
          <div class="tab">
@@ -26,9 +29,9 @@
          </div>
          </div> -->
 
-    <div id="1" class="editor-outer">
-        <canvas class="editor"></canvas>
-    </div>
+    <!-- <div id="1" class="editor-outer">
+         <canvas class="editor"></canvas>
+         </div> -->
 
     <!-- <div id="2" class="editor-outer">
          <canvas class="editor"></canvas>
@@ -40,10 +43,10 @@
 
 
     <!-- vendor -->
-    <script type="text/javascript" src="/vendor/jquery-2.1.4.js"></script>
+    <script type="text/javascript" src="/vendor.bundle.js"></script>
     <script type="text/javascript" src="/vendor/fabric-1.5.0/fabric.js"></script>
-
-    <script type="text/javascript" src="/bundle.js" charset="utf-8"></script>
+    <script type="text/javascript" src="/node_modules/materialize-css/dist/js/materialize.js"></script>
+    <script type="text/javascript" src="/user.bundle.js"></script>
 </body>
 
 </html>

@@ -19,19 +19,18 @@ class Canvas {
         });
         window.editor = editor;
 
-        var inputModeLabel = new FabricText("[", {
-            opacity: 0.2
-        });
-        editor.add(inputModeLabel);
-
-        var modeIcon = new FabricText('Pen', {
-            opacity: 0.2,
-            fontSize: 16
-        });
-        editor.add(modeIcon);
-
         var lastTextPos = { x: 0, y: 0 },
             lastText = null;
+
+        // 前に保存したデータがあれば読み込む
+        localforage.getItem('userData')
+            .then((data) => {
+                if (!data) { return; }
+                editor.loadFromJSON(data, () => {
+                    this.buildPixy();
+                    editor.renderAll();
+                });
+            });
 
         $document.on('keyup', function (e) {
             // TODO modifier キーのときは文字入力しない
@@ -56,7 +55,9 @@ class Canvas {
             if (isMoved || !lastText) {
                 isMoved = false;
                 text = new FabricText(char, {
-                    lockUniScaling: true
+                    lockUniScaling: true,
+                    hasControls: false,
+                    fill: editor.freeDrawingBrush.color
                 });
                 text.setTop(mousePos.y);
                 text.setLeft(mousePos.x);
@@ -82,15 +83,24 @@ class Canvas {
             // マウスカーソルが動いたかどうかのしきい値
             OFFSET = 10;
 
-        $body.on('mousemove', function (e) {
+        $body.on('mousemove', (e) => {
             mousePos.x = e.clientX;
-            mousePos.y = e.clientY;
+            mousePos.y = e.clientY - 42; // header offset
 
-            inputModeLabel.setLeft(mousePos.x - 15);
-            inputModeLabel.setTop(mousePos.y);
+            if (this.inputModeLabel) {
+                this.inputModeLabel.setLeft(mousePos.x - 15);
+                this.inputModeLabel.setTop(mousePos.y);
+            }
 
-            modeIcon.setLeft(mousePos.x - 30);
-            modeIcon.setTop(mousePos.y - 20);
+            if (this.modeIcon) {
+                this.modeIcon.setLeft(mousePos.x - 30);
+                this.modeIcon.setTop(mousePos.y - 20);
+            }
+
+            // ht.pixy.set({
+            //     left: mousePos.x - 12,
+            //     top: mousePos.y + 28
+            // });
 
             editor.renderAll();
 
@@ -100,13 +110,28 @@ class Canvas {
                 //console.log('moved');
                 isMoved = true;
             }
-        }).on('mousedown', function (e) {
-            inputModeLabel.setVisible(false);
-            modeIcon.setVisible(false);
-        }).on('mouseup', function (e) {
-            inputModeLabel.setVisible(true);
-            modeIcon.setVisible(true);
+        }).on('mousedown', () => {
+            this.inputModeLabel.setVisible(false);
+            this.modeIcon.setVisible(false);
+        }).on('mouseup', () => {
+            this.inputModeLabel.setVisible(true);
+            this.modeIcon.setVisible(true);
         });
+    }
+
+    buildPixy () {
+        this.inputModeLabel = new FabricText("[", {
+            opacity: 0.2
+        });
+        editor.add(this.inputModeLabel);
+        window.inputModeLabel = this.inputModeLabel;
+
+        this.modeIcon = new FabricText('Pen', {
+            opacity: 0.2,
+            fontSize: 16
+        });
+        editor.add(this.modeIcon);
+        window.modeIcon = this.modeIcon;
     }
 }
 
