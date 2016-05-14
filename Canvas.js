@@ -1,10 +1,16 @@
-var FabricText = require('./FabricText.js');
+var FabricText = require('./FabricText.js'),
+    FabricCanvas = require('./FabricCanvas');
 
 var keycodes = {
     TAB: 9,
-    SPACE: 17,
+    CTRL: 17,
+    SPACE: 32,
     ESC: 27,
-    BACKSPACE: 8
+    BACKSPACE: 8,
+    SHIFT: 16,
+    COMMAND_L: 91,
+    COMMAND_R: 93,
+    ALT_L: 18
 };
 
 class Canvas {
@@ -13,7 +19,7 @@ class Canvas {
         var $document = $(document),
             $body = $(document.body);
 
-        var editor = new fabric.Canvas(canvasEl, {
+        var editor = new FabricCanvas(canvasEl, {
             isDrawingMode: true,
             imageSmoothingEnabled: true
         });
@@ -25,25 +31,42 @@ class Canvas {
         // 前に保存したデータがあれば読み込む
         localforage.getItem('userData')
             .then((data) => {
+                this.buildPixy();
+
                 if (!data) { return; }
+
+                editor.clear();
                 editor.loadFromJSON(data, () => {
-                    this.buildPixy();
                     editor.renderAll();
                 });
             });
 
-        $document.on('keyup', function (e) {
-            // TODO modifier キーのときは文字入力しない
+        $document.on('keydown', (e) => {
+            if (e.ctrlKey) {
+                editor.drawStart(e);
+            }
+        });
+
+        $document.on('keyup', (e) => {
+
+            if (!ht.inputMode) {
+                return;
+            }
+
+            if (e.keyCode === keycodes.CTRL && editor.isDrawingMode) {
+                editor.drawEnd(e);
+                this.switchPixy();
+            }
+
+            // modifier キーのときは文字入力しない
+            if (_.includes([keycodes.ALT_L, keycodes.COMMAND_R, keycodes.COMMAND_L, keycodes.SHIFT, keycodes.CTRL], e.keyCode)) {
+                return;
+            }
 
             if (e.keyCode === keycodes.TAB) {
                 // change mode
                 editor.isDrawingMode = !editor.isDrawingMode;
-                if (editor.isDrawingMode) {
-                    modeIcon.setText('Pen');
-                } else {
-                    modeIcon.setText('Select');
-                }
-                editor.renderAll();
+                this.switchPixy();
                 return;
             }
 
@@ -56,7 +79,7 @@ class Canvas {
                 isMoved = false;
                 text = new FabricText(char, {
                     lockUniScaling: true,
-                    hasControls: false,
+                    //hasControls: false,
                     fill: editor.freeDrawingBrush.color
                 });
                 text.setTop(mousePos.y);
@@ -132,6 +155,15 @@ class Canvas {
         });
         editor.add(this.modeIcon);
         window.modeIcon = this.modeIcon;
+    }
+
+    switchPixy () {
+        if (editor.isDrawingMode) {
+            modeIcon.setText('Pen');
+        } else {
+            modeIcon.setText('Select');
+        }
+        editor.renderAll();
     }
 }
 

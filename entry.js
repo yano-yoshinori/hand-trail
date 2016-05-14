@@ -8,7 +8,10 @@
 
 require('./core/base.scss');
 
-window.ht = {};
+window.ht = {
+    // canvas 上のテキスト入力モード
+    inputMode: true
+};
 
 var keycodes = {
     TAB: 9,
@@ -28,6 +31,10 @@ fabric.StaticCanvas.prototype._setImageSmoothing = function() {
 };
 
 $(document).on('keydown', function (e) {
+    if (!ht.inputMode) {
+        return;
+    }
+
     if (_.includes([keycodes.TAB, keycodes.BACKSPACE, keycodes.SPACE], e.keyCode)) {
         e.preventDefault();
     }
@@ -39,3 +46,5 @@ ReactDOM.render(
     root,
     document.getElementsByClassName('root')[0]
 );
+
+require('./vendor/analytics.js');
