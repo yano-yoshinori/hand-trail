@@ -64,7 +64,17 @@ class Header extends React.Component {
 
         localforage.getItem('fileList').then(
             (data) => {
-                this.setState({ fileNames: JSON.parse(data) });
+                var fileNames = data ? JSON.parse(data) : [];
+                this.setState({ fileNames });
+                if (fileNames.length > 0) {
+                    localforage.getItem(_.first(fileNames)).then(
+                        (data) => {
+                            editor.clear();
+                            editor.loadFromJSON(data, () => {
+                                editor.renderAll();
+                            });
+                        });
+                }
             });
     }
 
@@ -171,7 +181,6 @@ class Header extends React.Component {
                 window.editor.add(window.inputModeLabel);
                 window.editor.add(window.modeIcon);
 
-
                 localforage.getItem('fileList').then(
                     (data) => {
                         var fileNames = JSON.parse(data);;
@@ -190,7 +199,6 @@ class Header extends React.Component {
                             });
                     });
                 });
-
     }
 }
 

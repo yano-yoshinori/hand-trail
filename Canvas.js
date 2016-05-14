@@ -28,18 +28,7 @@ class Canvas {
         var lastTextPos = { x: 0, y: 0 },
             lastText = null;
 
-        // 前に保存したデータがあれば読み込む
-        localforage.getItem('userData')
-            .then((data) => {
-                this.buildPixy();
-
-                if (!data) { return; }
-
-                editor.clear();
-                editor.loadFromJSON(data, () => {
-                    editor.renderAll();
-                });
-            });
+        this.buildPixy();
 
         $document.on('keydown', (e) => {
             if (e.ctrlKey) {
