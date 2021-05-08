@@ -13,7 +13,11 @@ function App() {
 
   return (
     <div className="text-center">
-      <header className="text-white bg-secondary">HandTrail</header>
+      <header className="px-2 text-white bg-secondary d-flex justify-content-between align-items-center">
+        <span />
+        <span>HandTrail</span>
+        <button>save</button>
+      </header>
       <div>
         <canvas ref={ref} width={innerWidth} height={innerHeight}></canvas>
       </div>

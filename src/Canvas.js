@@ -42,6 +42,10 @@ export default class Canvas {
     })
     global.editor = editor
 
+    editor.on('selection:created', this.handleSelectionChange)
+    editor.on('selection:updated', this.handleSelectionChange)
+    // editor.on('selection:cleared', this.handleSelectionClear)
+
     var lastTextPos = { x: 0, y: 0 },
       lastText = null
 
@@ -55,12 +59,25 @@ export default class Canvas {
     this.buildPixy()
 
     document.addEventListener('keydown', (e) => {
+      if (
+        e.key === 'Delete' ||
+        // metaKey は keydown のときしかとれない
+        (e.key === 'Backspace' && e.metaKey)
+      ) {
+        const items = editor.getActiveObjects()
+        items.forEach((item) => {
+          editor.remove(item)
+        })
+        editor.discardActiveObject()
+        return
+      }
+
       if (EXCLUDE_KEY_CODES.includes(e.code)) {
         e.preventDefault()
         return
       }
 
-      if (e.ctrlKey) {
+      if (['Control', 'Alt'].includes(e.key)) {
         editor.drawStart(e)
       }
     })
@@ -70,9 +87,16 @@ export default class Canvas {
       //     return
       //   }
 
-      if (e.keyCode === keycodes.CTRL && editor.isDrawingMode) {
+      if (['Control', 'Alt'].includes(e.key) && editor.isDrawingMode) {
         editor.drawEnd(e)
         this.switchPixy()
+        return
+      }
+
+      if (e.key === 'Backspace') {
+        const item = editor.item(editor.size() - 1)
+        editor.remove(item)
+        return
       }
 
       // modifier キーのときは文字入力しない
@@ -170,6 +194,21 @@ export default class Canvas {
       this.modeIcon.set('visible', true)
     })
   }
+
+  handleSelectionChange(e) {
+    if (editor.isDrawingMode) {
+      return
+    }
+
+    e.target.set('hasControls', true)
+  }
+
+  // handleSelectionClear(e) {
+  //   const items = e.deselected
+  //   items.forEach((item) => {
+  //     item.set('hasControls', false)
+  //   })
+  // }
 
   buildPixy() {
     this.inputModeLabel = new FabricText('[', {
