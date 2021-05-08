@@ -25,6 +25,7 @@ const EXCLUDE_KEY_CODES = [
   'Space',
   'Backspace',
   'Tab',
+  'Delete',
 ]
 
 const { body } = document
@@ -211,14 +212,14 @@ export default class Canvas {
   // }
 
   buildPixy() {
-    this.inputModeLabel = new FabricText('[', {
+    this.inputModeLabel = new fabric.Text('[', {
       opacity: 0.1,
       fontSize: 22,
     })
     editor.add(this.inputModeLabel)
     global.inputModeLabel = this.inputModeLabel
 
-    this.modeIcon = new FabricText('pen', {
+    this.modeIcon = new fabric.Text('pen', {
       opacity: 0.1,
       fontSize: 16,
     })
