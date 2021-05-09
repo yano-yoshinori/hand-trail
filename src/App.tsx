@@ -8,6 +8,14 @@ import Canvas from './Canvas'
 
 const { innerWidth, innerHeight } = window
 
+const minResolutin = {
+  width: 1920,
+  height: 1080,
+}
+
+const canvasWidth = innerWidth < minResolutin.width ? minResolutin.width : innerWidth
+const canvasHeight = innerHeight < minResolutin.height ? minResolutin.height : innerHeight
+
 interface User {
   uid: string
   displayName: string
@@ -20,11 +28,14 @@ interface File {
 
 function App() {
   const ref = useRef<HTMLCanvasElement>(null)
+  const inputRef = useRef<HTMLInputElement>(null)
   const [user, updateUser] = useState<User>({ uid: '', displayName: '' })
   const [files, updateFiles] = useState<string[]>([])
 
   useEffect(() => {
     new Canvas(ref.current)
+
+    inputRef.current?.focus()
 
     firebase.auth().onAuthStateChanged(async (user) => {
       if (user) {
@@ -106,14 +117,20 @@ function App() {
     input.value = doc.id
   }
 
+  function undo() {
+    const { editor }: any = global
+    const item = editor.item(editor.size() - 1)
+    editor.remove(item)
+  }
+
   return (
     <div className="text-center">
       <header
-        className="px-2 text-white bg-secondary d-flex justify-content-between align-items-center"
-        style={{ height: 44 }}
+        className="position-fixed px-2 text-white bg-secondary d-flex justify-content-between align-items-center"
+        style={{ width: '100%', height: 44, top: 0, zIndex: 1 }}
       >
-        <span>
-          <select className="form-select form-select-sm" onChange={loadFile}>
+        <span className="d-flex">
+          <select className="form-select form-select-sm me-2" onChange={loadFile}>
             <option value=""></option>
             {files.map((name: string) => (
               <option key={name} value={name}>
@@ -121,9 +138,23 @@ function App() {
               </option>
             ))}
           </select>
+          <button className="btn btn-primary btn-sm" onClick={undo}>
+            undo
+          </button>
         </span>
         <span className="fw-bold">HandTrail</span>
         <span className="d-flex">
+          <input
+            type="text"
+            name="hiddenInput"
+            ref={inputRef}
+            className="me-2"
+            onKeyDown={(e) => {
+              if (e.key === 'Tab') {
+                e.preventDefault()
+              }
+            }}
+          />
           <input
             type="text"
             placeholder="file name"
@@ -143,7 +174,7 @@ function App() {
         </span>
       </header>
       <div>
-        <canvas ref={ref} width={innerWidth} height={innerHeight}></canvas>
+        <canvas ref={ref} width={canvasWidth} height={canvasHeight}></canvas>
       </div>
     </div>
   )

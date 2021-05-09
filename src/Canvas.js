@@ -2,7 +2,6 @@ import _ from 'lodash'
 import { fabric } from 'fabric'
 
 import FabricCanvas from './fabric-components/FabricCanvas'
-import FabricText from './fabric-components/FabricText'
 import { DEFAULT_TEXT_SIZE } from './constants/misc'
 
 var keycodes = {
@@ -18,14 +17,15 @@ var keycodes = {
 }
 
 const EXCLUDE_KEY_CODES = [
-  'ArrowLeft',
-  'ArrowRight',
-  'ArrowUp',
-  'ArrowDown',
-  'Space',
-  'Backspace',
-  'Tab',
-  'Delete',
+  // 'ArrowLeft',
+  // 'ArrowRight',
+  // 'ArrowUp',
+  // 'ArrowDown',
+  // 'Space',
+  // 'Backspace',
+  // 'Tab',
+  // 'Delete',
+  // 'Enter',
 ]
 
 const { body } = document
@@ -43,8 +43,8 @@ export default class Canvas {
     })
     global.editor = editor
 
-    editor.on('selection:created', this.handleSelectionChange)
-    editor.on('selection:updated', this.handleSelectionChange)
+    editor.on('selection:created', handleSelectionChange)
+    editor.on('selection:updated', handleSelectionChange)
     // editor.on('selection:cleared', this.handleSelectionClear)
 
     var lastTextPos = { x: 0, y: 0 },
@@ -59,7 +59,30 @@ export default class Canvas {
 
     this.buildPixy()
 
+    function handleSelectionChange(e) {
+      if (editor.isDrawingMode) {
+        return
+      }
+
+      if (e.target.type === 'i-text') {
+        isMoved = false
+        lastText = e.target
+
+        const input = document.querySelector('input[name=hiddenInput]')
+        input.value = e.target.text
+        // こうしないと focus がセットされない
+        setTimeout(() => {
+          input.focus()
+        })
+      }
+
+      e.target.set('hasControls', true)
+    }
+
     document.addEventListener('keydown', (e) => {
+      const input = document.querySelector('input[name=hiddenInput]')
+      input.focus()
+
       if (
         e.key === 'Delete' ||
         // metaKey は keydown のときしかとれない
@@ -94,11 +117,11 @@ export default class Canvas {
         return
       }
 
-      if (e.key === 'Backspace') {
-        const item = editor.item(editor.size() - 1)
-        editor.remove(item)
-        return
-      }
+      // if (e.key === 'Backspace') {
+      //   const item = editor.item(editor.size() - 1)
+      //   editor.remove(item)
+      //   return
+      // }
 
       // modifier キーのときは文字入力しない
       if (
@@ -123,39 +146,47 @@ export default class Canvas {
         return
       }
 
-      var text = null,
-        char = e.key
+      const input = document.querySelector('input[name=hiddenInput]')
+      var itext = null,
+        text = input.value // e.key
 
       if (isMoved || !lastText) {
-        isMoved = false
-        text = new FabricText(char, {
-          lockUniScaling: true,
-          hasControls: false, // TODO select mode にしたときは true にする
-          fill: editor.freeDrawingBrush.color,
-          fontSize: DEFAULT_TEXT_SIZE,
-          // editable: true,
-          // inCompositionMode: true,
-        })
-        text.set('top', mousePos.y)
-        text.set('left', mousePos.x)
-        editor.add(text)
-        editor.setActiveObject(text)
+        if (text) {
+          isMoved = false
+          itext = new fabric.IText(text, {
+            lockUniScaling: true,
+            hasControls: false, // TODO select mode にしたときは true にする
+            fill: editor.freeDrawingBrush.color,
+            fontSize: DEFAULT_TEXT_SIZE,
+            editable: false,
+          })
+          itext.set('top', mousePos.y)
+          itext.set('left', mousePos.x)
+          editor.add(itext)
+          editor.setActiveObject(itext)
+          lastText = itext
+        }
       } else {
-        text = lastText
-        text.set('text', text.get('text') + char)
+        if (text) {
+          itext = lastText
+          itext.set('text', text)
+        } else {
+          editor.remove(lastText)
+          lastText = null
+        }
+        // text.set('text', text.get('text') + char)
         //text.insertChars(char);
         //text.setSelectionEnd(9999);
         editor.renderAll()
       }
-      lastText = text
 
       lastTextPos.x = mousePos.x
       lastTextPos.y = mousePos.y
     })
 
     body.addEventListener('mousemove', (e) => {
-      mousePos.x = e.clientX
-      mousePos.y = e.clientY - 42 // header offset
+      mousePos.x = e.pageX
+      mousePos.y = e.pageY - 42 // header offset
 
       if (this.inputModeLabel) {
         this.inputModeLabel.set('left', mousePos.x - 10)
@@ -182,6 +213,7 @@ export default class Canvas {
         lastTextPos.y + OFFSET < mousePos.y
       ) {
         isMoved = true
+        document.querySelector('input[name=hiddenInput]').value = ''
       }
     })
 
@@ -196,14 +228,6 @@ export default class Canvas {
     })
   }
 
-  handleSelectionChange(e) {
-    if (editor.isDrawingMode) {
-      return
-    }
-
-    e.target.set('hasControls', true)
-  }
-
   // handleSelectionClear(e) {
   //   const items = e.deselected
   //   items.forEach((item) => {
@@ -215,6 +239,7 @@ export default class Canvas {
     this.inputModeLabel = new fabric.Text('[', {
       opacity: 0.1,
       fontSize: 22,
+      selectable: false,
     })
     editor.add(this.inputModeLabel)
     global.inputModeLabel = this.inputModeLabel
@@ -222,6 +247,7 @@ export default class Canvas {
     this.modeIcon = new fabric.Text('pen', {
       opacity: 0.1,
       fontSize: 16,
+      selectable: false,
     })
     editor.add(this.modeIcon)
     global.modeIcon = this.modeIcon
