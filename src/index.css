@@ -9,13 +9,3 @@ body {
 code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New', monospace;
 }
-
-#root .form-control,
-#root .form-select {
-  border: darkgray;
-  background-color: gray;
-}
-
-#root .form-control {
-  color: white;
-}

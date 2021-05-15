@@ -165,7 +165,7 @@ export default class Canvas {
             hasControls: false, // TODO select mode にしたときは true にする
             fill: editor.freeDrawingBrush.color,
             fontSize: DEFAULT_TEXT_SIZE,
-            editable: false,
+            // editable: false,
           })
           itext.set('top', mousePos.y)
           itext.set('left', mousePos.x)
