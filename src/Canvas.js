@@ -35,17 +35,30 @@ let editor
 // ref: https://github.com/fabricjs/fabric.js/issues/4113#issuecomment-316644627
 fabric.devicePixelRatio = 2
 
+const FABRIC_CANVAS_OPTIONS = {
+  isDrawingMode: true,
+  selectionFullyContained: true,
+  backgroundColor: '#545554',
+  // imageSmoothingEnabled: true,
+}
+
 export default class Canvas {
   constructor(canvasEl) {
-    editor = new FabricCanvas(canvasEl, {
-      isDrawingMode: true,
-      // imageSmoothingEnabled: true,
-    })
+    editor = new FabricCanvas(canvasEl, FABRIC_CANVAS_OPTIONS)
     global.editor = editor
+
+    editor.freeDrawingBrush.color = 'white'
 
     editor.on('selection:created', handleSelectionChange)
     editor.on('selection:updated', handleSelectionChange)
     // editor.on('selection:cleared', this.handleSelectionClear)
+
+    editor.on('path:created', (e) => {
+      const { path } = e
+      // 手書きはクリック領域が広いので、邪魔にならないように一番奥に送る
+      // TODO これをすると最後のオブジェクトを削除が動かなくなる
+      path.sendToBack()
+    })
 
     var lastTextPos = { x: 0, y: 0 },
       lastText = null
@@ -55,7 +68,7 @@ export default class Canvas {
       // マウスカーソルが動いたかどうかを記録
       isMoved = false,
       // マウスカーソルが動いたかどうかのしきい値
-      OFFSET = 10
+      OFFSET = 20
 
     this.buildPixy()
 
@@ -70,19 +83,12 @@ export default class Canvas {
 
         const input = document.querySelector('input[name=hiddenInput]')
         input.value = e.target.text
-        // こうしないと focus がセットされない
-        setTimeout(() => {
-          input.focus()
-        })
+      } else if (e.target.type === 'path') {
+        e.target.set('hasControls', true)
       }
-
-      e.target.set('hasControls', true)
     }
 
     document.addEventListener('keydown', (e) => {
-      const input = document.querySelector('input[name=hiddenInput]')
-      input.focus()
-
       if (
         e.key === 'Delete' ||
         // metaKey は keydown のときしかとれない
@@ -139,6 +145,7 @@ export default class Canvas {
         if (e.code === 'Tab') {
           // change mode
           editor.isDrawingMode = !editor.isDrawingMode
+          editor.discardActiveObject()
           this.switchPixy()
           return
         }

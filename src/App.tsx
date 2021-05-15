@@ -26,6 +26,8 @@ interface File {
   data: string
 }
 
+let focusOn = true
+
 function App() {
   const ref = useRef<HTMLCanvasElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
@@ -126,8 +128,8 @@ function App() {
   return (
     <div className="text-center">
       <header
-        className="position-fixed px-2 text-white bg-secondary d-flex justify-content-between align-items-center"
-        style={{ width: '100%', height: 44, top: 0, zIndex: 1 }}
+        className="position-fixed px-2 text-white d-flex justify-content-between align-items-center"
+        style={{ width: '100%', height: 44, top: 0, zIndex: 1, backgroundColor: '#333' }}
       >
         <span className="d-flex">
           <select className="form-select form-select-sm me-2" onChange={loadFile}>
@@ -142,30 +144,49 @@ function App() {
             undo
           </button>
         </span>
-        <span className="fw-bold">HandTrail</span>
+        <input
+          type="text"
+          name="hiddenInput"
+          ref={inputRef}
+          className="form-control form-control-sm me-2"
+          // TODO 空のときは caret を transparent にする
+          style={{ width: 200, caretColor: 'lightgray' }}
+          onKeyDown={(e) => {
+            if (e.key === 'Tab') {
+              e.preventDefault()
+            }
+          }}
+          onBlur={() => {
+            if (!focusOn) return
+
+            setTimeout(() => {
+              inputRef.current?.focus()
+            })
+          }}
+        />
         <span className="d-flex">
-          <input
-            type="text"
-            name="hiddenInput"
-            ref={inputRef}
-            className="me-2"
-            onKeyDown={(e) => {
-              if (e.key === 'Tab') {
-                e.preventDefault()
-              }
-            }}
-          />
           <input
             type="text"
             placeholder="file name"
             className="form-control form-control-sm me-2"
             name="filename"
+            onClick={(e: React.MouseEvent<HTMLInputElement>) => {
+              const { target }: any = e
+              focusOn = false
+              setTimeout(() => {
+                target.focus()
+              })
+            }}
+            onBlur={() => {
+              focusOn = true
+              inputRef.current?.focus()
+            }}
           />
           <button type="button" className="btn btn-primary btn-sm" onClick={save}>
             save
           </button>
           {user.displayName ? (
-            <span className="ms-2">{user.displayName.substr(0, 1)}</span>
+            <span className="pt-1 ms-2">{user.displayName.substr(0, 1)}</span>
           ) : (
             <button type="button" className="btn btn-primary btn-sm ms-2" onClick={login}>
               login
