@@ -97,10 +97,26 @@ function App() {
         <div className="d-flex">
           {user.displayName ? (
             <>
+              <button type="button" className="btn btn-secondary btn-sm me-2" onClick={() => {
+                const url = ref.current?.toDataURL()
+
+                const input = document.querySelector('input[name=filename]') as HTMLInputElement
+                const name = input.value
+
+                if (!url || !name) return
+
+                const a = document.createElement('a')
+                a.href = url
+                a.download = `${name}.png`
+                a.click()
+                a.remove()
+              }}>
+                export
+              </button>
               <button type="button" className="btn btn-secondary btn-sm" onClick={() => save(user)}>
                 save
               </button>
-              <span className="pt-1 ms-2 text-white">{user.displayName.substr(0, 1)}</span>
+              <span className="pt-1 ms-2 text-white" title={user.displayName}>{user.displayName.substr(0, 1)}</span>
             </>
           ) : (
             <button
