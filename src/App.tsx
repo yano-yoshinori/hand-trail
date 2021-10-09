@@ -65,7 +65,7 @@ function App() {
               updateFiles(files)
             }}
           >
-            file
+            <i className="fa fa-folder" />
           </button>
           <button
             className="btn btn-secondary btn-sm"
@@ -74,7 +74,7 @@ function App() {
               canvasRef.current?.clear()
             }}
           >
-            new
+            <i className="fa fa-file" />
           </button>
           {/* <button className="btn btn-secondary btn-sm me-2" onClick={undo}>
             undo
@@ -127,7 +127,7 @@ function App() {
                   a.remove()
                 }}
               >
-                export
+                <i className="fa fa-download" />
               </button>
               <button
                 type="button"
@@ -135,7 +135,7 @@ function App() {
                 title="save"
                 onClick={() => save(user)}
               >
-                save
+                <i className="fa fa-save" />
               </button>
               <span className="pt-1 ms-2 text-white" title={user.displayName}>
                 {user.displayName.substr(0, 1)}

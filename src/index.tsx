@@ -1,11 +1,12 @@
 import React from 'react'
 import ReactDOM from 'react-dom'
 import firebase from 'firebase/app'
+import '../node_modules/bootstrap/dist/css/bootstrap.min.css'
+import '@fortawesome/fontawesome-free/css/all.css'
 
 import './index.css'
 import App from './App'
 import reportWebVitals from './reportWebVitals'
-import '../node_modules/bootstrap/dist/css/bootstrap.min.css'
 
 const {
   REACT_APP_FIREBASE_API_KEY,

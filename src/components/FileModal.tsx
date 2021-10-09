@@ -46,12 +46,13 @@ const FileModal = ({ open, files, user, onClickClose }: Props) => {
               />
               <button
                 className="btn btn-primary btn-sm"
+                title="save"
                 onClick={() => {
                   save(user)
                   onClickClose()
                 }}
               >
-                save
+                <i className="fa fa-save" />
               </button>
             </div>
           </div>
