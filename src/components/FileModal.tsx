@@ -1,4 +1,4 @@
-import { loadFile } from '../api'
+import { loadFile, save } from '../api'
 import { User } from '../types'
 
 interface Props {
@@ -37,13 +37,22 @@ const FileModal = ({ open, files, user, onClickClose }: Props) => {
             </div>
             {/* File Name */}
             <h5 className="text-start">File Name</h5>
-            <div>
+            <div className="d-flex">
               <input
                 type="text"
                 placeholder="file name"
                 className="form-control form-control-sm me-2"
                 name="filename"
               />
+              <button
+                className="btn btn-primary btn-sm"
+                onClick={() => {
+                  save(user)
+                  onClickClose()
+                }}
+              >
+                save
+              </button>
             </div>
           </div>
         </div>

@@ -268,4 +268,9 @@ export default class Canvas {
     }
     editor.renderAll()
   }
+
+  clear() {
+    editor.clear()
+    editor.set('backgroundColor', FABRIC_CANVAS_OPTIONS.backgroundColor)
+  }
 }

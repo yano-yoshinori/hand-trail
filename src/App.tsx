@@ -24,13 +24,14 @@ const canvasHeight = innerHeight < MIN_RESOLUTION.height ? MIN_RESOLUTION.height
 function App() {
   const ref = useRef<HTMLCanvasElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
+  const canvasRef = useRef<Canvas>()
   const [user, updateUser] = useState<User>({ uid: '', displayName: '' })
   const [files, updateFiles] = useState<string[]>([])
   const [fileOperationMode, updateFileOperationMode] = useState<boolean>(false)
   const [visibleFileModal, updateVisibleFileModal] = useState<boolean>(false)
 
   useEffect(() => {
-    new Canvas(ref.current)
+    canvasRef.current = new Canvas(ref.current)
 
     inputRef.current?.focus()
 
@@ -54,6 +55,7 @@ function App() {
           <button
             type="button"
             className="btn btn-secondary btn-sm me-2"
+            title="file menu"
             data-bs-toggle="modal"
             data-bs-target="#exampleModal"
             onClick={async () => {
@@ -64,6 +66,15 @@ function App() {
             }}
           >
             file
+          </button>
+          <button
+            className="btn btn-secondary btn-sm"
+            title="new"
+            onClick={() => {
+              canvasRef.current?.clear()
+            }}
+          >
+            new
           </button>
           {/* <button className="btn btn-secondary btn-sm me-2" onClick={undo}>
             undo
@@ -97,31 +108,44 @@ function App() {
         <div className="d-flex">
           {user.displayName ? (
             <>
-              <button type="button" className="btn btn-secondary btn-sm me-2" onClick={() => {
-                const url = ref.current?.toDataURL()
+              <button
+                type="button"
+                className="btn btn-secondary btn-sm me-2"
+                title="export"
+                onClick={() => {
+                  const url = ref.current?.toDataURL()
 
-                const input = document.querySelector('input[name=filename]') as HTMLInputElement
-                const name = input.value
+                  const input = document.querySelector('input[name=filename]') as HTMLInputElement
+                  const name = input.value
 
-                if (!url || !name) return
+                  if (!url || !name) return
 
-                const a = document.createElement('a')
-                a.href = url
-                a.download = `${name}.png`
-                a.click()
-                a.remove()
-              }}>
+                  const a = document.createElement('a')
+                  a.href = url
+                  a.download = `${name}.png`
+                  a.click()
+                  a.remove()
+                }}
+              >
                 export
               </button>
-              <button type="button" className="btn btn-secondary btn-sm" onClick={() => save(user)}>
+              <button
+                type="button"
+                className="btn btn-primary btn-sm"
+                title="save"
+                onClick={() => save(user)}
+              >
                 save
               </button>
-              <span className="pt-1 ms-2 text-white" title={user.displayName}>{user.displayName.substr(0, 1)}</span>
+              <span className="pt-1 ms-2 text-white" title={user.displayName}>
+                {user.displayName.substr(0, 1)}
+              </span>
             </>
           ) : (
             <button
               type="button"
               className="btn btn-primary btn-sm ms-2"
+              title="login"
               onClick={() => login(updateUser)}
             >
               login
