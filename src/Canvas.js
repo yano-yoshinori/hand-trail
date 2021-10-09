@@ -42,12 +42,19 @@ const FABRIC_CANVAS_OPTIONS = {
   // imageSmoothingEnabled: true,
 }
 
+const FREE_DRAWING_BRUSH_PROPS = {
+  color: 'white',
+  width: 2,
+}
+
 export default class Canvas {
   constructor(canvasEl) {
     editor = new FabricCanvas(canvasEl, FABRIC_CANVAS_OPTIONS)
     global.editor = editor
 
-    editor.freeDrawingBrush.color = 'white'
+    const { color, width } = FREE_DRAWING_BRUSH_PROPS
+    editor.freeDrawingBrush.color = color
+    editor.freeDrawingBrush.width = width
 
     editor.on('selection:created', handleSelectionChange)
     editor.on('selection:updated', handleSelectionChange)
@@ -58,6 +65,9 @@ export default class Canvas {
       // 手書きはクリック領域が広いので、邪魔にならないように一番奥に送る
       // TODO これをすると最後のオブジェクトを削除が動かなくなる
       path.sendToBack()
+
+      // 保留
+      // path.perPixelTargetFind = true
     })
 
     var lastTextPos = { x: 0, y: 0 },
