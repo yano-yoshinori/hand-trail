@@ -15,6 +15,20 @@ const { innerWidth, innerHeight } = window
 const canvasWidth = innerWidth < MIN_RESOLUTION.width ? MIN_RESOLUTION.width : innerWidth
 const canvasHeight = innerHeight < MIN_RESOLUTION.height ? MIN_RESOLUTION.height : innerHeight
 
+const PAINT_COLORS = [{
+  name: 'white',
+  color: 'white'
+}, {
+  name: 'red',
+  color: 'red'
+}, {
+  name: 'lime',
+  color: 'lime'
+}, {
+  name: 'skyblue',
+  color: 'skyblue'
+}] as const
+
 // function undo() {
 //   const { editor }: any = global
 //   const item = editor.item(editor.size() - 1)
@@ -27,6 +41,7 @@ function App() {
   const canvasRef = useRef<Canvas>()
   const [user, updateUser] = useState<User>({ uid: '', displayName: '' })
   const [files, updateFiles] = useState<string[]>([])
+  const [currentColor, setCurrentColor] = useState<string>('white')
   const [fileOperationMode, updateFileOperationMode] = useState<boolean>(false)
   const [visibleFileModal, updateVisibleFileModal] = useState<boolean>(false)
 
@@ -68,7 +83,7 @@ function App() {
             <i className="fa fa-folder" />
           </button>
           <button
-            className="btn btn-secondary btn-sm"
+            className="btn btn-secondary btn-sm me-4"
             title="new"
             onClick={() => {
               canvasRef.current?.clear()
@@ -79,6 +94,15 @@ function App() {
           {/* <button className="btn btn-secondary btn-sm me-2" onClick={undo}>
             undo
           </button> */}
+
+          {PAINT_COLORS.map(({ name, color }) => (
+            <button key={name} title={name} className={`btn btn-${currentColor === color ? 'primary' : 'secondary'} btn-sm me-2`} onClick={() => {
+              canvasRef.current?.changeColor(color)
+              setCurrentColor(color)
+            }}>
+              <i className="fas fa-tint" style={{ color }} />
+            </button>
+          ))}
         </div>
 
         <input

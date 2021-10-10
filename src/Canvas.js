@@ -283,4 +283,8 @@ export default class Canvas {
     editor.clear()
     editor.set('backgroundColor', FABRIC_CANVAS_OPTIONS.backgroundColor)
   }
+
+  changeColor(color) {
+    editor.freeDrawingBrush.color = color
+  }
 }
