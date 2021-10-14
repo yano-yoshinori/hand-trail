@@ -286,5 +286,21 @@ export default class Canvas {
 
   changeColor(color) {
     editor.freeDrawingBrush.color = color
+
+    const objects = editor.getActiveObjects()
+
+    if (objects.length === 0) {
+      return
+    }
+
+    objects.forEach((object) => {
+      if (object.type === 'path') {
+        object.set('stroke', color)
+      } else if (object.type === 'i-text') {
+        object.set('fill', color)
+      }
+    })
+
+    editor.renderAll()
   }
 }
