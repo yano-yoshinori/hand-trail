@@ -37,7 +37,7 @@ const PAINT_COLORS = [{
 
 function App() {
   const ref = useRef<HTMLCanvasElement>(null)
-  const inputRef = useRef<HTMLInputElement>(null)
+  const inputRef = useRef<HTMLTextAreaElement>(null)
   const canvasRef = useRef<Canvas>()
   const [user, updateUser] = useState<User>({ uid: '', displayName: '' })
   const [files, updateFiles] = useState<string[]>([])
@@ -105,14 +105,14 @@ function App() {
           ))}
         </div>
 
-        <input
-          type="text"
+        <textarea
           name="hiddenInput"
           ref={inputRef}
           className="form-control form-control-sm me-2 bg-secondary text-white"
           // TODO 空のときは caret を transparent にする
           style={{
             width: 200,
+            height: '1rem',
             caretColor: 'lightgray',
             border: 'darkgray',
           }}

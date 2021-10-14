@@ -87,11 +87,11 @@ export default class Canvas {
         return
       }
 
-      if (e.target.type === 'i-text') {
+      if (e.target.type === 'textbox') {
         isMoved = false
         lastText = e.target
 
-        const input = document.querySelector('input[name=hiddenInput]')
+        const input = document.querySelector('[name=hiddenInput]')
         input.value = e.target.text
       } else if (e.target.type === 'path') {
         e.target.set('hasControls', true)
@@ -163,30 +163,30 @@ export default class Canvas {
         return
       }
 
-      const input = document.querySelector('input[name=hiddenInput]')
-      var itext = null,
+      const input = document.querySelector('[name=hiddenInput]')
+      let textbox = null,
         text = input.value // e.key
 
       if (isMoved || !lastText) {
         if (text) {
           isMoved = false
-          itext = new fabric.IText(text, {
+          textbox = new fabric.Textbox(text, {
             lockUniScaling: true,
             hasControls: false, // TODO select mode にしたときは true にする
             fill: editor.freeDrawingBrush.color,
             fontSize: DEFAULT_TEXT_SIZE,
             // editable: false,
           })
-          itext.set('top', mousePos.y)
-          itext.set('left', mousePos.x)
-          editor.add(itext)
-          editor.setActiveObject(itext)
-          lastText = itext
+          textbox.set('top', mousePos.y)
+          textbox.set('left', mousePos.x)
+          editor.add(textbox)
+          editor.setActiveObject(textbox)
+          lastText = textbox
         }
       } else {
         if (text) {
-          itext = lastText
-          itext.set('text', text)
+          textbox = lastText
+          textbox.set('text', text)
         } else {
           editor.remove(lastText)
           lastText = null
@@ -222,7 +222,7 @@ export default class Canvas {
 
       editor.renderAll()
 
-      // 10px ずれたら IText オブジェクトを新たに作る
+      // 10px ずれたら Textbox オブジェクトを新たに作る
       if (
         mousePos.x < lastTextPos.x - OFFSET ||
         lastTextPos.x + OFFSET < mousePos.x ||
@@ -230,7 +230,7 @@ export default class Canvas {
         lastTextPos.y + OFFSET < mousePos.y
       ) {
         isMoved = true
-        document.querySelector('input[name=hiddenInput]').value = ''
+        document.querySelector('[name=hiddenInput]').value = ''
       }
     })
 
@@ -296,7 +296,7 @@ export default class Canvas {
     objects.forEach((object) => {
       if (object.type === 'path') {
         object.set('stroke', color)
-      } else if (object.type === 'i-text') {
+      } else if (object.type === 'textbox') {
         object.set('fill', color)
       }
     })
