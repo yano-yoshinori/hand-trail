@@ -2,7 +2,7 @@ import _ from 'lodash'
 import { fabric } from 'fabric'
 
 import FabricCanvas from './fabric-components/FabricCanvas'
-import { DEFAULT_TEXT_SIZE } from './constants/misc'
+import { DEFAULT_TEXT_SIZE, STRAIGHT_LINE_THRESHOLD } from './constants/misc'
 
 var keycodes = {
   TAB: 9,
@@ -48,6 +48,9 @@ const FREE_DRAWING_BRUSH_PROPS = {
 }
 
 export default class Canvas {
+  lastFreeDrawingPos = null
+  lastFreeDrawingCircle = null
+
   constructor(canvasEl) {
     editor = new FabricCanvas(canvasEl, FABRIC_CANVAS_OPTIONS)
     global.editor = editor
@@ -62,6 +65,33 @@ export default class Canvas {
 
     editor.on('path:created', (e) => {
       const { path } = e
+
+      if (path.path.length < STRAIGHT_LINE_THRESHOLD) {
+        if (this.lastFreeDrawingPos) {
+          const line = new fabric.Line([this.lastFreeDrawingPos.left, this.lastFreeDrawingPos.top, path.left, path.top], {
+            stroke: editor.freeDrawingBrush.color,
+            strokeWidth: FREE_DRAWING_BRUSH_PROPS.width
+          })
+          editor.add(line)
+        }
+
+        this.lastFreeDrawingPos = {
+          left: path.left,
+          top: path.top,
+        }
+
+        this.lastFreeDrawingCircle.set('opacity', 0.5)
+        this.lastFreeDrawingCircle.set('left', path.left)
+        this.lastFreeDrawingCircle.set('top', path.top)
+        this.lastFreeDrawingCircle.bringToFront()
+
+        editor.remove(path)
+        return
+      } else {
+        this.lastFreeDrawingPos = null
+        this.lastFreeDrawingCircle.set('opacity', 0)
+      }
+
       // 手書きはクリック領域が広いので、邪魔にならないように一番奥に送る
       // TODO これをすると最後のオブジェクトを削除が動かなくなる
       path.sendToBack()
@@ -81,6 +111,17 @@ export default class Canvas {
       OFFSET = 20
 
     this.buildPixy()
+
+    this.lastFreeDrawingCircle = new fabric.Circle({
+      left: 0,
+      top: 0,
+      radius: 4,
+      fill: 'red',
+      opacity: 0,
+      originX: 'center',
+      originY: 'center',
+    })
+    editor.add(this.lastFreeDrawingCircle)
 
     function handleSelectionChange(e) {
       if (editor.isDrawingMode) {
