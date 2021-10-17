@@ -43,7 +43,6 @@ function App() {
   const [files, updateFiles] = useState<string[]>([])
   const [currentColor, setCurrentColor] = useState<string>('white')
   const [fileOperationMode, updateFileOperationMode] = useState<boolean>(false)
-  const [visibleFileModal, updateVisibleFileModal] = useState<boolean>(false)
 
   useEffect(() => {
     canvasRef.current = new Canvas(ref.current)
@@ -72,10 +71,9 @@ function App() {
             className="btn btn-secondary btn-sm me-2"
             title="file menu"
             data-bs-toggle="modal"
-            data-bs-target="#exampleModal"
+            data-bs-target="#file-modal"
             onClick={async () => {
               updateFileOperationMode(true)
-              updateVisibleFileModal(true)
               const files = await getFiles(user)
               updateFiles(files)
             }}
@@ -183,12 +181,10 @@ function App() {
 
       {/* components */}
       <FileModal
-        open={visibleFileModal}
         files={files}
         user={user}
         onClickClose={() => {
           updateFileOperationMode(false)
-          updateVisibleFileModal(false)
           inputRef.current?.focus()
         }}
       />

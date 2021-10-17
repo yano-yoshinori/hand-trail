@@ -2,15 +2,15 @@ import { loadFile, save } from '../api'
 import { User } from '../types'
 
 interface Props {
-  open: boolean
   files: string[]
   user: User
   onClickClose: () => void
 }
 
-const FileModal = ({ open, files, user, onClickClose }: Props) => {
+const FileModal = ({ files, user, onClickClose }: Props) => {
+
   return (
-    <div className="modal" tabIndex={-1} style={{ display: open ? 'block' : 'none' }}>
+    <div id="file-modal" className="modal fade" tabIndex={-1}>
       <div className="modal-dialog">
         <div className="modal-content">
           <div className="modal-header">
