@@ -2,6 +2,8 @@ import { useEffect, useRef, useState } from 'react'
 import firebase from 'firebase/app'
 import 'firebase/auth'
 import 'firebase/firestore'
+import { fabric } from 'fabric'
+import _ from 'lodash'
 
 import './App.css'
 import Canvas from './Canvas'
@@ -34,6 +36,29 @@ const PAINT_COLORS = [{
 //   const item = editor.item(editor.size() - 1)
 //   editor.remove(item)
 // }
+
+document.onpaste = function (e: any) {
+  const items = Array.from(e.clipboardData.items)
+
+  if (items.length === 0) {
+    return
+  }
+
+  const item: any = _.first(items)
+
+  if (!item.type.startsWith('image')) {
+    return
+  }
+
+  // TODO upload image
+  const blob = item.getAsFile();
+  const url = URL.createObjectURL(blob);
+
+  fabric.Image.fromURL(url, function (image: any) {
+    const { editor }: any = global
+    editor.add(image)
+  })
+}
 
 function App() {
   const ref = useRef<HTMLCanvasElement>(null)
