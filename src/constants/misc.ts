@@ -7,3 +7,8 @@ export const MIN_RESOLUTION = {
 
 // 直線にするかフリーハンドにするかの閾値
 export const STRAIGHT_LINE_THRESHOLD = 5
+
+export const STORAGE_KEYS = {
+  // 線の上にカーソルがあるときだけ選択できるモード
+  perPixelTargetFind: 'perPixelTargetFind',
+} as const

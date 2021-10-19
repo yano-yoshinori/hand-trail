@@ -7,29 +7,35 @@ import _ from 'lodash'
 
 import './App.css'
 import Canvas from './Canvas'
-import FileModal from './components/FileModal'
+import { FileModal } from './components/FileModal'
 import { User } from './types'
 import { MIN_RESOLUTION } from './constants/misc'
 import { getFiles, login, save } from './api'
+import { ConfigModal } from './components/ConfigModal'
 
 const { innerWidth, innerHeight } = window
 
 const canvasWidth = innerWidth < MIN_RESOLUTION.width ? MIN_RESOLUTION.width : innerWidth
 const canvasHeight = innerHeight < MIN_RESOLUTION.height ? MIN_RESOLUTION.height : innerHeight
 
-const PAINT_COLORS = [{
-  name: 'white',
-  color: 'white'
-}, {
-  name: 'red',
-  color: 'red'
-}, {
-  name: 'lime',
-  color: 'lime'
-}, {
-  name: 'skyblue',
-  color: 'skyblue'
-}] as const
+const PAINT_COLORS = [
+  {
+    name: 'white',
+    color: 'white',
+  },
+  {
+    name: 'red',
+    color: 'red',
+  },
+  {
+    name: 'lime',
+    color: 'lime',
+  },
+  {
+    name: 'skyblue',
+    color: 'skyblue',
+  },
+] as const
 
 // function undo() {
 //   const { editor }: any = global
@@ -51,8 +57,8 @@ document.onpaste = function (e: any) {
   }
 
   // TODO upload image
-  const blob = item.getAsFile();
-  const url = URL.createObjectURL(blob);
+  const blob = item.getAsFile()
+  const url = URL.createObjectURL(blob)
 
   fabric.Image.fromURL(url, function (image: any) {
     const { editor }: any = global
@@ -119,10 +125,15 @@ function App() {
           </button> */}
 
           {PAINT_COLORS.map(({ name, color }) => (
-            <button key={name} title={name} className={`btn btn-${currentColor === color ? 'primary' : 'secondary'} btn-sm me-2`} onClick={() => {
-              canvasRef.current?.changeColor(color)
-              setCurrentColor(color)
-            }}>
+            <button
+              key={name}
+              title={name}
+              className={`btn btn-${currentColor === color ? 'primary' : 'secondary'} btn-sm me-2`}
+              onClick={() => {
+                canvasRef.current?.changeColor(color)
+                setCurrentColor(color)
+              }}
+            >
               <i className="fas fa-tint" style={{ color }} />
             </button>
           ))}
@@ -184,9 +195,18 @@ function App() {
               >
                 <i className="fa fa-save" />
               </button>
-              <span className="pt-1 ms-2 text-white" title={user.displayName}>
+              <span className="pt-1 mx-2 text-white" title={user.displayName}>
                 {user.displayName.substr(0, 1)}
               </span>
+              <button
+                type="button"
+                className="btn btn-secondary btn-sm"
+                title="config"
+                data-bs-toggle="modal"
+                data-bs-target="#config-modal"
+              >
+                <i className="fa fa-cog" />
+              </button>
             </>
           ) : (
             <button
@@ -213,6 +233,7 @@ function App() {
           inputRef.current?.focus()
         }}
       />
+      <ConfigModal />
     </div>
   )
 }

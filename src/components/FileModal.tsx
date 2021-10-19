@@ -7,8 +7,7 @@ interface Props {
   onClickClose: () => void
 }
 
-const FileModal = ({ files, user, onClickClose }: Props) => {
-
+export const FileModal = ({ files, user, onClickClose }: Props) => {
   return (
     <div id="file-modal" className="modal fade" tabIndex={-1}>
       <div className="modal-dialog">
@@ -18,9 +17,8 @@ const FileModal = ({ files, user, onClickClose }: Props) => {
               type="button"
               className="btn-close"
               data-bs-dismiss="modal"
-              aria-label="Close"
               onClick={onClickClose}
-            ></button>
+            />
           </div>
           <div className="modal-body mb-3">
             {/* Open */}
@@ -61,5 +59,3 @@ const FileModal = ({ files, user, onClickClose }: Props) => {
     </div>
   )
 }
-
-export default FileModal

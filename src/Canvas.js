@@ -2,7 +2,7 @@ import _ from 'lodash'
 import { fabric } from 'fabric'
 
 import FabricCanvas from './fabric-components/FabricCanvas'
-import { DEFAULT_TEXT_SIZE, STRAIGHT_LINE_THRESHOLD } from './constants/misc'
+import { DEFAULT_TEXT_SIZE, STORAGE_KEYS, STRAIGHT_LINE_THRESHOLD } from './constants/misc'
 
 var keycodes = {
   TAB: 9,
@@ -29,6 +29,7 @@ const EXCLUDE_KEY_CODES = [
 ]
 
 const { body } = document
+const { localStorage } = window
 let editor
 
 // 文字をにじませないようにする
@@ -68,10 +69,13 @@ export default class Canvas {
 
       if (path.path.length < STRAIGHT_LINE_THRESHOLD) {
         if (this.lastFreeDrawingPos) {
-          const line = new fabric.Line([this.lastFreeDrawingPos.left, this.lastFreeDrawingPos.top, path.left, path.top], {
+          const line = new fabric.Line(
+            [this.lastFreeDrawingPos.left, this.lastFreeDrawingPos.top, path.left, path.top],
+            {
             stroke: editor.freeDrawingBrush.color,
-            strokeWidth: FREE_DRAWING_BRUSH_PROPS.width
-          })
+              strokeWidth: FREE_DRAWING_BRUSH_PROPS.width,
+            }
+          )
           editor.add(line)
         }
 
@@ -96,8 +100,17 @@ export default class Canvas {
       // TODO これをすると最後のオブジェクトを削除が動かなくなる
       path.sendToBack()
 
-      // 保留
-      // path.perPixelTargetFind = true
+      if (localStorage.getItem(STORAGE_KEYS.perPixelTargetFind) === 'true') {
+        path.perPixelTargetFind = true
+
+        path.on('mouseover', function () {
+          path.set('strokeWidth', FREE_DRAWING_BRUSH_PROPS.width * 3)
+        })
+
+        path.on('mouseout', function () {
+          path.set('strokeWidth', FREE_DRAWING_BRUSH_PROPS.width)
+        })
+      }
     })
 
     var lastTextPos = { x: 0, y: 0 },
