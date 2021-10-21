@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { Fragment, useEffect, useRef, useState } from 'react'
 import firebase from 'firebase/app'
 import 'firebase/auth'
 import 'firebase/firestore'
@@ -124,19 +124,30 @@ function App() {
             undo
           </button> */}
 
-          {PAINT_COLORS.map(({ name, color }) => (
-            <button
-              key={name}
-              title={name}
-              className={`btn btn-${currentColor === color ? 'primary' : 'secondary'} btn-sm me-2`}
-              onClick={() => {
-                canvasRef.current?.changeColor(color)
-                setCurrentColor(color)
-              }}
-            >
-              <i className="fas fa-tint" style={{ color }} />
-            </button>
-          ))}
+          <div className="btn-group">
+            {PAINT_COLORS.map(({ name, color }) => (
+              <Fragment key={name}>
+                <input
+                  type="radio"
+                  name="pen-color"
+                  checked={currentColor === color}
+                  id={`pen-color-${name}`}
+                  className="btn-check"
+                  onChange={() => {
+                    canvasRef.current?.changeColor(color)
+                    setCurrentColor(color)
+                  }}
+                />
+                <label
+                  htmlFor={`pen-color-${name}`}
+                  title={name}
+                  className="btn btn-outline-secondary btn-sm px-3"
+                >
+                  <i className="fas fa-tint" style={{ color }} />
+                </label>
+              </Fragment>
+            ))}
+          </div>
         </div>
 
         <textarea
