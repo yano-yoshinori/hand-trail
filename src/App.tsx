@@ -116,6 +116,8 @@ function App() {
             title="new"
             onClick={() => {
               canvasRef.current?.clear()
+              const input = document.querySelector('input[name=filename]') as HTMLInputElement
+              input.value = ''
             }}
           >
             <i className="fa fa-file" />
