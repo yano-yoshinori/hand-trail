@@ -242,6 +242,7 @@ function App() {
         onClickClose={() => {
           updateFileOperationMode(false)
           inputRef.current?.focus()
+          canvasRef.current?.addPixy()
         }}
       />
       <ConfigModal />

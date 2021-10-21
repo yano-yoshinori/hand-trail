@@ -72,7 +72,7 @@ export default class Canvas {
           const line = new fabric.Line(
             [this.lastFreeDrawingPos.left, this.lastFreeDrawingPos.top, path.left, path.top],
             {
-            stroke: editor.freeDrawingBrush.color,
+              stroke: editor.freeDrawingBrush.color,
               strokeWidth: FREE_DRAWING_BRUSH_PROPS.width,
             }
           )
@@ -123,7 +123,23 @@ export default class Canvas {
       // マウスカーソルが動いたかどうかのしきい値
       OFFSET = 20
 
-    this.buildPixy()
+    // this.inputModeLabel = new fabric.Text('[', {
+    //   opacity: 0.2,
+    //   fontSize: 22,
+    //   selectable: false,
+    //   fill: 'white',
+    // })
+    // global.inputModeLabel = this.inputModeLabel
+
+    this.modeIcon = new fabric.Text('pen', {
+      opacity: 0.2,
+      fontSize: 16,
+      selectable: false,
+      fill: 'white',
+    })
+    global.modeIcon = this.modeIcon
+
+    this.addPixy()
 
     this.lastFreeDrawingCircle = new fabric.Circle({
       left: 0,
@@ -231,8 +247,8 @@ export default class Canvas {
             fontSize: DEFAULT_TEXT_SIZE,
             // editable: false,
           })
-          textbox.set('top', mousePos.y)
-          textbox.set('left', mousePos.x)
+          textbox.set('left', mousePos.x + 2)
+          textbox.set('top', mousePos.y + 46)
           editor.add(textbox)
           editor.setActiveObject(textbox)
           lastText = textbox
@@ -257,16 +273,16 @@ export default class Canvas {
 
     body.addEventListener('mousemove', (e) => {
       mousePos.x = e.pageX
-      mousePos.y = e.pageY - 42 // header offset
+      mousePos.y = e.pageY - 44 // header offset
 
-      if (this.inputModeLabel) {
-        this.inputModeLabel.set('left', mousePos.x - 10)
-        this.inputModeLabel.set('top', mousePos.y)
-      }
+      // if (this.inputModeLabel) {
+      //   this.inputModeLabel.set('left', mousePos.x + 4)
+      //   this.inputModeLabel.set('top', mousePos.y + 44)
+      // }
 
       if (this.modeIcon) {
-        this.modeIcon.set('left', mousePos.x - 30)
-        this.modeIcon.set('top', mousePos.y - 20)
+        this.modeIcon.set('left', mousePos.x + 5)
+        this.modeIcon.set('top', mousePos.y + 18)
       }
 
       // ht.pixy.set({
@@ -289,12 +305,12 @@ export default class Canvas {
     })
 
     body.addEventListener('mousedown', () => {
-      this.inputModeLabel.set('vislble', false)
+      // this.inputModeLabel.set('visible', false)
       this.modeIcon.set('visible', false)
     })
 
     body.addEventListener('mouseup', () => {
-      this.inputModeLabel.set('visible', true)
+      // this.inputModeLabel.set('visible', true)
       this.modeIcon.set('visible', true)
     })
   }
@@ -306,22 +322,9 @@ export default class Canvas {
   //   })
   // }
 
-  buildPixy() {
-    this.inputModeLabel = new fabric.Text('[', {
-      opacity: 0.1,
-      fontSize: 22,
-      selectable: false,
-    })
-    editor.add(this.inputModeLabel)
-    global.inputModeLabel = this.inputModeLabel
-
-    this.modeIcon = new fabric.Text('pen', {
-      opacity: 0.1,
-      fontSize: 16,
-      selectable: false,
-    })
+  addPixy() {
+    // editor.add(this.inputModeLabel)
     editor.add(this.modeIcon)
-    global.modeIcon = this.modeIcon
   }
 
   switchPixy() {
@@ -336,6 +339,7 @@ export default class Canvas {
   clear() {
     editor.clear()
     editor.set('backgroundColor', FABRIC_CANVAS_OPTIONS.backgroundColor)
+    this.addPixy()
   }
 
   changeColor(color) {
