@@ -12,6 +12,7 @@ import { User } from './types'
 import { MIN_RESOLUTION } from './constants/misc'
 import { getFiles, login, save } from './api'
 import { ConfigModal } from './components/ConfigModal'
+import { createHistoryInstance, getHistoryInstance } from './models/History'
 
 const { innerWidth, innerHeight } = window
 
@@ -74,11 +75,16 @@ function App() {
   const [files, updateFiles] = useState<string[]>([])
   const [currentColor, setCurrentColor] = useState<string>('white')
   const [fileOperationMode, updateFileOperationMode] = useState<boolean>(false)
+  const [undoEnabled, setUndoEnabled] = useState(false)
 
   useEffect(() => {
     canvasRef.current = new Canvas(ref.current)
 
     inputRef.current?.focus()
+
+    createHistoryInstance((enabled: boolean) => {
+      setUndoEnabled(enabled)
+    })
 
     firebase.auth().onAuthStateChanged(async (user) => {
       if (user) {
@@ -99,7 +105,7 @@ function App() {
         <div className="d-flex align-items-center">
           <button
             type="button"
-            className="btn btn-secondary btn-sm me-2"
+            className="btn btn-outline-secondary btn-sm me-2"
             title="file menu"
             data-bs-toggle="modal"
             data-bs-target="#file-modal"
@@ -112,7 +118,7 @@ function App() {
             <i className="fa fa-folder" />
           </button>
           <button
-            className="btn btn-secondary btn-sm me-4"
+            className="btn btn-outline-secondary btn-sm me-4"
             title="new"
             onClick={() => {
               canvasRef.current?.clear()
@@ -122,9 +128,18 @@ function App() {
           >
             <i className="fa fa-file" />
           </button>
-          {/* <button className="btn btn-secondary btn-sm me-2" onClick={undo}>
-            undo
-          </button> */}
+
+          <button
+            title="undo"
+            className="btn btn-outline-primary btn-sm me-2"
+            disabled={!undoEnabled}
+            onClick={() => {
+              const length = getHistoryInstance().undo()
+              setUndoEnabled(length > 0)
+            }}
+          >
+            <i className="fa fa-undo" />
+          </button>
 
           <div className="btn-group">
             {PAINT_COLORS.map(({ name, color }) => (
@@ -143,7 +158,7 @@ function App() {
                 <label
                   htmlFor={`pen-color-${name}`}
                   title={name}
-                  className="btn btn-outline-secondary btn-sm px-3"
+                  className="btn btn-outline-primary btn-sm px-3"
                 >
                   <i className="fas fa-tint" style={{ color }} />
                 </label>
@@ -162,6 +177,7 @@ function App() {
             height: '1rem',
             caretColor: 'lightgray',
             border: 'darkgray',
+            resize: 'none',
           }}
           onKeyDown={(e) => {
             if (e.key === 'Tab') {
@@ -181,7 +197,7 @@ function App() {
             <>
               <button
                 type="button"
-                className="btn btn-secondary btn-sm me-2"
+                className="btn btn-outline-secondary btn-sm me-2"
                 title="export"
                 onClick={() => {
                   const url = ref.current?.toDataURL()
@@ -202,7 +218,7 @@ function App() {
               </button>
               <button
                 type="button"
-                className="btn btn-primary btn-sm"
+                className="btn btn-outline-primary btn-sm"
                 title="save"
                 onClick={() => save(user)}
               >
@@ -213,7 +229,7 @@ function App() {
               </span>
               <button
                 type="button"
-                className="btn btn-secondary btn-sm"
+                className="btn btn-outline-secondary btn-sm"
                 title="config"
                 data-bs-toggle="modal"
                 data-bs-target="#config-modal"
@@ -224,7 +240,7 @@ function App() {
           ) : (
             <button
               type="button"
-              className="btn btn-primary btn-sm ms-2"
+              className="btn btn-outline-primary btn-sm ms-2"
               title="login"
               onClick={() => login(updateUser)}
             >

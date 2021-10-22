@@ -3,6 +3,7 @@ import { fabric } from 'fabric'
 
 import FabricCanvas from './fabric-components/FabricCanvas'
 import { DEFAULT_TEXT_SIZE, STORAGE_KEYS, STRAIGHT_LINE_THRESHOLD } from './constants/misc'
+import { createListen, getHistoryInstance } from './models/History'
 
 var keycodes = {
   TAB: 9,
@@ -76,7 +77,10 @@ export default class Canvas {
               strokeWidth: FREE_DRAWING_BRUSH_PROPS.width,
             }
           )
+
           editor.add(line)
+          getHistoryInstance().push({ type: 'line:created', targets: [line] })
+          line.on('removed', createListen('line:removed', [line]))
         }
 
         this.lastFreeDrawingPos = {
@@ -94,6 +98,9 @@ export default class Canvas {
       } else {
         this.lastFreeDrawingPos = null
         this.lastFreeDrawingCircle.set('opacity', 0)
+
+        getHistoryInstance().push({ type: 'path:created', targets: [path] })
+        path.on('removed', createListen('path:removed', [path]))
       }
 
       // 手書きはクリック領域が広いので、邪魔にならないように一番奥に送る
@@ -252,9 +259,18 @@ export default class Canvas {
           editor.add(textbox)
           editor.setActiveObject(textbox)
           lastText = textbox
+
+          getHistoryInstance().push({ type: 'text:created', targets: [textbox] })
+          textbox.on('removed', createListen('text:removed', [textbox]))
         }
       } else {
         if (text) {
+          getHistoryInstance().push({
+            type: 'text:updated',
+            targets: [lastText],
+            lastValue: lastText.get('text'),
+          })
+
           textbox = lastText
           textbox.set('text', text)
         } else {
@@ -343,16 +359,22 @@ export default class Canvas {
   }
 
   changeColor(color) {
-    editor.freeDrawingBrush.color = color
-
     const objects = editor.getActiveObjects()
+
+    getHistoryInstance().push({
+      type: 'object:color-changed',
+      targets: objects,
+      lastValue: editor.freeDrawingBrush.color,
+    })
+
+    editor.freeDrawingBrush.color = color
 
     if (objects.length === 0) {
       return
     }
 
     objects.forEach((object) => {
-      if (object.type === 'path') {
+      if (['line', 'path'].includes(object.type)) {
         object.set('stroke', color)
       } else if (object.type === 'textbox') {
         object.set('fill', color)
