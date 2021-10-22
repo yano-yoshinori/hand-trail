@@ -194,9 +194,9 @@ export default class Canvas {
         return
       }
 
-      if (['Control', 'Alt'].includes(e.key)) {
-        editor.drawStart(e)
-      }
+      // if (['Control', 'Alt', 'Shift'].includes(e.key)) {
+      //   editor.drawStart(e)
+      // }
     })
 
     document.addEventListener('keyup', (e) => {
@@ -204,11 +204,11 @@ export default class Canvas {
       //     return
       //   }
 
-      if (['Control', 'Alt'].includes(e.key) && editor.isDrawingMode) {
-        editor.drawEnd(e)
-        this.switchPixy()
-        return
-      }
+      // if (['Control', 'Alt', 'Shift'].includes(e.key) && editor.isDrawingMode) {
+      //   editor.drawEnd(e)
+      //   this.switchPixy()
+      //   return
+      // }
 
       // if (e.key === 'Backspace') {
       //   const item = editor.item(editor.size() - 1)
