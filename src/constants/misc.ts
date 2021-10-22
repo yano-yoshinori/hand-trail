@@ -12,3 +12,5 @@ export const STORAGE_KEYS = {
   // 線の上にカーソルがあるときだけ選択できるモード
   perPixelTargetFind: 'perPixelTargetFind',
 } as const
+
+export const HEADER_HEIGHT = 44

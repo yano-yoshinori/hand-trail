@@ -9,10 +9,11 @@ import './App.css'
 import Canvas from './Canvas'
 import { FileModal } from './components/FileModal'
 import { User } from './types'
-import { MIN_RESOLUTION } from './constants/misc'
+import { HEADER_HEIGHT, MIN_RESOLUTION } from './constants/misc'
 import { getFiles, login, save } from './api'
 import { ConfigModal } from './components/ConfigModal'
 import { createHistoryInstance, getHistoryInstance } from './models/History'
+import { upload } from './models/Upload'
 
 const { innerWidth, innerHeight } = window
 
@@ -44,7 +45,9 @@ const PAINT_COLORS = [
 //   editor.remove(item)
 // }
 
-document.onpaste = function (e: any) {
+document.onpaste = async function (e: ClipboardEvent) {
+  if (!e.clipboardData) return
+
   const items = Array.from(e.clipboardData.items)
 
   if (items.length === 0) {
@@ -57,13 +60,16 @@ document.onpaste = function (e: any) {
     return
   }
 
-  // TODO upload image
-  const blob = item.getAsFile()
-  const url = URL.createObjectURL(blob)
+  const { mousePos, editor, user }: any = global
 
-  fabric.Image.fromURL(url, function (image: any) {
-    const { editor }: any = global
-    editor.add(image)
+  const blob = item.getAsFile()
+  const url = await upload(user.uid, Date.now().toFixed(), blob)
+
+  const fabricImage = new fabric.Image()
+  fabricImage.set({ left: mousePos.x, top: mousePos.y - HEADER_HEIGHT })
+  fabricImage.setSrc(url, function () {
+    editor.add(fabricImage)
+    editor.renderAll()
   })
 }
 
@@ -90,6 +96,7 @@ function App() {
       if (user) {
         // User is signed in.
         updateUser({ uid: user.uid, displayName: user.displayName || '' })
+        ;(global as any).user = user
       } else {
         // No user is signed in.
       }

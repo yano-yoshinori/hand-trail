@@ -2,7 +2,12 @@ import _ from 'lodash'
 import { fabric } from 'fabric'
 
 import FabricCanvas from './fabric-components/FabricCanvas'
-import { DEFAULT_TEXT_SIZE, STORAGE_KEYS, STRAIGHT_LINE_THRESHOLD } from './constants/misc'
+import {
+  DEFAULT_TEXT_SIZE,
+  HEADER_HEIGHT,
+  STORAGE_KEYS,
+  STRAIGHT_LINE_THRESHOLD,
+} from './constants/misc'
 import { createListen, getHistoryInstance } from './models/History'
 
 var keycodes = {
@@ -289,7 +294,9 @@ export default class Canvas {
 
     body.addEventListener('mousemove', (e) => {
       mousePos.x = e.pageX
-      mousePos.y = e.pageY - 44 // header offset
+      mousePos.y = e.pageY - HEADER_HEIGHT
+
+      global.mousePos = mousePos
 
       // if (this.inputModeLabel) {
       //   this.inputModeLabel.set('left', mousePos.x + 4)
