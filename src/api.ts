@@ -29,6 +29,7 @@ export async function save(user: User) {
   const name = input.value
 
   if (!name) {
+    alert('ファイル名が入力されていません')
     return
   }
 

@@ -166,7 +166,7 @@ export default class Canvas {
     this.lastFreeDrawingCircle = new fabric.Circle({
       left: 0,
       top: 0,
-      radius: 4,
+      radius: 3,
       fill: 'red',
       opacity: 0,
       originX: 'center',
@@ -405,7 +405,7 @@ export default class Canvas {
   }
 }
 
-function listenModification(target) {
+export function listenModification(target) {
   target.on('moved', function () {
     const lastValue = getHistoryInstance().getLastValue(target)
     getHistoryInstance().push({

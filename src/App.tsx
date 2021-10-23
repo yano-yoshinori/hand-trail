@@ -6,7 +6,7 @@ import { fabric } from 'fabric'
 import _ from 'lodash'
 
 import './App.css'
-import Canvas from './Canvas'
+import Canvas, { listenModification } from './Canvas'
 import { FileModal } from './components/FileModal'
 import { User } from './types'
 import { HEADER_HEIGHT, MIN_RESOLUTION } from './constants/misc'
@@ -65,11 +65,20 @@ document.onpaste = async function (e: ClipboardEvent) {
   const blob = item.getAsFile()
   const url = await upload(user.uid, Date.now().toFixed(), blob)
 
-  const fabricImage = new fabric.Image()
-  fabricImage.set({ left: mousePos.x, top: mousePos.y - HEADER_HEIGHT })
-  fabricImage.setSrc(url, function () {
-    editor.add(fabricImage)
+  const image = new fabric.Image()
+  image.setSrc(url, function () {
+    const width = image.get('width') ?? 0
+    const height = image.get('height') ?? 0
+    image.set({
+      left: mousePos.x + width / 2,
+      top: mousePos.y + height / 2 + HEADER_HEIGHT,
+      originX: 'center',
+      originY: 'center',
+    })
+    editor.add(image)
     editor.renderAll()
+    getHistoryInstance().push({ type: 'created', targets: [image] })
+    listenModification(image)
   })
 }
 
