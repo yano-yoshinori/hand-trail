@@ -9,8 +9,8 @@ interface Props {
 
 export const FileModal = ({ files, user, onClickClose }: Props) => {
   return (
-    <div id="file-modal" className="modal fade" tabIndex={-1}>
-      <div className="modal-dialog">
+    <div id="file-modal" tabIndex={-1} className="modal fade">
+      <div className="modal-dialog me-3">
         <div className="modal-content">
           <div className="modal-header">
             <button
@@ -21,21 +21,9 @@ export const FileModal = ({ files, user, onClickClose }: Props) => {
             />
           </div>
           <div className="modal-body mb-3">
-            {/* Open */}
-            <h5 className="text-start">Open</h5>
-            <div className="mb-4">
-              <select className="form-select form-select-sm" onChange={(e) => loadFile(e, user)}>
-                <option value=""></option>
-                {files.map((name: string) => (
-                  <option key={name} value={name}>
-                    {name}
-                  </option>
-                ))}
-              </select>
-            </div>
             {/* File Name */}
             <h5 className="text-start">File Name</h5>
-            <div className="d-flex">
+            <div className="d-flex mb-3">
               <input
                 type="text"
                 placeholder="file name"
@@ -52,6 +40,25 @@ export const FileModal = ({ files, user, onClickClose }: Props) => {
               >
                 <i className="fa fa-save" />
               </button>
+            </div>
+            {/* Open */}
+            <h5 className="text-start">Open</h5>
+            <div
+              className="list-group text-start"
+              style={{ height: window.innerHeight - 266, overflowY: 'scroll' }}
+            >
+              {files.map((name: string) => (
+                <button
+                  key={name}
+                  type="button"
+                  className="list-group-item list-group-item-action"
+                  onClick={() => {
+                    loadFile(name, user.uid)
+                  }}
+                >
+                  {name}
+                </button>
+              ))}
             </div>
           </div>
         </div>

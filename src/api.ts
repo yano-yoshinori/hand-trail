@@ -3,20 +3,13 @@ import 'firebase/auth'
 import 'firebase/firestore'
 import { User, File } from './types'
 
-export async function loadFile(e: React.ChangeEvent<HTMLSelectElement>, user: User) {
-  const { editor }: any = global
-  const name = e.target.value
-
-  if (!name) {
-    editor.clear()
-    return
-  }
-
+export async function loadFile(name: string, uid: string) {
   const db = firebase.firestore()
-  const ref = await db.collection(`users/${user.uid}/drawordFiles`).doc(name)
+  const ref = await db.collection(`users/${uid}/drawordFiles`).doc(name)
   const doc = await ref.get()
   const file = doc.data() as File
 
+  const { editor }: any = global
   editor.clear()
   editor.loadFromJSON(JSON.parse(file.data))
 
