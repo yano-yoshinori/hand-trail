@@ -4,7 +4,15 @@ import _ from 'lodash'
 interface History {
   type: string
   targets: fabric.Object[]
-  lastValue?: number | string
+  lastValue?: number | string | fabric.Point
+}
+
+interface LastValue {
+  left: number | undefined
+  top: number | undefined
+  scaleX: number | undefined
+  angle: number | undefined
+  target: fabric.Object
 }
 
 type Callback = (enabled: boolean) => void
@@ -12,6 +20,7 @@ type Callback = (enabled: boolean) => void
 class Histories {
   items: History[] = []
   // cursor: number = 0
+  lastValues: LastValue[] = []
   callback: Callback
 
   constructor(callback: Callback) {
@@ -21,6 +30,24 @@ class Histories {
   push(item: History) {
     this.items.push(item)
     this.callback(this.items.length > 0)
+  }
+
+  setLastValues(objects: fabric.Object[]) {
+    this.lastValues = objects.map((object) => {
+      return {
+        left: object.get('left'),
+        top: object.get('top'),
+        scaleX: object.get('scaleX'),
+        angle: object.get('angle'),
+        target: object,
+      }
+    })
+  }
+
+  getLastValue(object: fabric.Object) {
+    const found = this.lastValues.find((value) => value.target === object)
+    console.log(found)
+    return found
   }
 
   undo() {
@@ -33,9 +60,7 @@ class Histories {
     const { type, targets, lastValue } = item
 
     switch (type) {
-      case 'line:created':
-      case 'path:created':
-      case 'text:created': {
+      case 'created': {
         const target = _.first(targets)
         const { editor }: any = global
 
@@ -54,15 +79,13 @@ class Histories {
         editor.renderAll()
         break
       }
-      case 'line:removed':
-      case 'path:removed':
-      case 'text:removed': {
+      case 'removed': {
         const target = _.first(targets)
         const { editor }: any = global
         editor.add(target)
         break
       }
-      case 'object:color-changed': {
+      case 'color-changed': {
         targets.forEach(function (target) {
           if (!target.type) return
 
@@ -74,6 +97,42 @@ class Histories {
         })
         const { editor }: any = global
         editor.renderAll()
+        break
+      }
+      case 'moved': {
+        targets.forEach(function (target) {
+          if (!target.type) return
+
+          const point = lastValue as fabric.Point
+          target.set('left', point.x)
+          target.set('top', point.y)
+        })
+        const { editor }: any = global
+        editor.renderAll()
+        break
+      }
+      case 'scaled': {
+        targets.forEach(function (target) {
+          if (!target.type) return
+
+          target.set('scaleX', lastValue as number)
+          target.set('scaleY', lastValue as number)
+        })
+        const { editor }: any = global
+        editor.renderAll()
+
+        break
+      }
+      case 'rotated': {
+        targets.forEach(function (target) {
+          if (!target.type) return
+
+          target.set('angle', lastValue as number)
+        })
+        const { editor }: any = global
+        editor.renderAll()
+
+        break
       }
     }
 

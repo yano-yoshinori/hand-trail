@@ -80,12 +80,15 @@ export default class Canvas {
             {
               stroke: editor.freeDrawingBrush.color,
               strokeWidth: FREE_DRAWING_BRUSH_PROPS.width,
+              originX: 'center',
+              originY: 'center',
             }
           )
 
           editor.add(line)
-          getHistoryInstance().push({ type: 'line:created', targets: [line] })
-          line.on('removed', createListen('line:removed', [line]))
+          getHistoryInstance().push({ type: 'created', targets: [line] })
+          line.on('removed', createListen('removed', [line]))
+          listenModification(line)
         }
 
         this.lastFreeDrawingPos = {
@@ -104,9 +107,16 @@ export default class Canvas {
         this.lastFreeDrawingPos = null
         this.lastFreeDrawingCircle.set('opacity', 0)
 
-        getHistoryInstance().push({ type: 'path:created', targets: [path] })
-        path.on('removed', createListen('path:removed', [path]))
+        getHistoryInstance().push({ type: 'created', targets: [path] })
+        path.on('removed', createListen('removed', [path]))
+        listenModification(path)
       }
+
+      // ずれないように 1 を足す
+      const ADJUSTMENT = 1
+      const left = path.get('left') + path.get('width') / 2 + ADJUSTMENT
+      const top = path.get('top') + path.get('height') / 2 + ADJUSTMENT
+      path.set({ originX: 'center', originY: 'center', left, top })
 
       // 手書きはクリック領域が広いので、邪魔にならないように一番奥に送る
       // TODO これをすると最後のオブジェクトを削除が動かなくなる
@@ -168,6 +178,8 @@ export default class Canvas {
       if (editor.isDrawingMode) {
         return
       }
+
+      getHistoryInstance().setLastValues(e.selected)
 
       if (e.target.type === 'textbox') {
         isMoved = false
@@ -265,8 +277,9 @@ export default class Canvas {
           editor.setActiveObject(textbox)
           lastText = textbox
 
-          getHistoryInstance().push({ type: 'text:created', targets: [textbox] })
-          textbox.on('removed', createListen('text:removed', [textbox]))
+          getHistoryInstance().push({ type: 'created', targets: [textbox] })
+          textbox.on('removed', createListen('removed', [textbox]))
+          listenModification(textbox)
         }
       } else {
         if (text) {
@@ -369,7 +382,7 @@ export default class Canvas {
     const objects = editor.getActiveObjects()
 
     getHistoryInstance().push({
-      type: 'object:color-changed',
+      type: 'color-changed',
       targets: objects,
       lastValue: editor.freeDrawingBrush.color,
     })
@@ -390,4 +403,33 @@ export default class Canvas {
 
     editor.renderAll()
   }
+}
+
+function listenModification(target) {
+  target.on('moved', function () {
+    const lastValue = getHistoryInstance().getLastValue(target)
+    getHistoryInstance().push({
+      type: 'moved',
+      targets: [target],
+      lastValue: new fabric.Point(lastValue.left, lastValue.top),
+    })
+  })
+
+  target.on('scaled', function () {
+    const lastValue = getHistoryInstance().getLastValue(target)
+    getHistoryInstance().push({
+      type: 'scaled',
+      targets: [target],
+      lastValue: lastValue.scaleX,
+    })
+  })
+
+  target.on('rotated', function () {
+    const lastValue = getHistoryInstance().getLastValue(target)
+    getHistoryInstance().push({
+      type: 'rotated',
+      targets: [target],
+      lastValue: lastValue.angle,
+    })
+  })
 }
