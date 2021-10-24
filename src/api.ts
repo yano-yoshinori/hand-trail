@@ -36,8 +36,6 @@ export async function save(user: User) {
       date: new Date(),
       data: JSON.stringify(editor.toJSON()),
     })
-
-  alert('保存しました')
 }
 
 export function login(updateUser: (user: User) => void) {

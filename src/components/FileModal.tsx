@@ -1,5 +1,6 @@
 import { loadFile, save } from '../api'
 import { User } from '../types'
+import { openToast } from './Toast'
 
 interface Props {
   files: string[]
@@ -33,9 +34,11 @@ export const FileModal = ({ files, user, onClickClose }: Props) => {
               <button
                 className="btn btn-primary btn-sm"
                 title="save"
+                data-bs-dismiss="modal"
                 onClick={() => {
                   save(user)
                   onClickClose()
+                  openToast('保存しました')
                 }}
               >
                 <i className="fa fa-save" />

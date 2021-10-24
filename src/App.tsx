@@ -14,6 +14,7 @@ import { getFiles, login, save } from './api'
 import { ConfigModal } from './components/ConfigModal'
 import { createHistoryInstance, getHistoryInstance } from './models/History'
 import { upload } from './models/Upload'
+import { initializeToast, openToast, Toast } from './components/Toast'
 
 const { innerWidth, innerHeight } = window
 
@@ -100,6 +101,12 @@ function App() {
     createHistoryInstance((enabled: boolean) => {
       setUndoEnabled(enabled)
     })
+
+    const toastEl = document.querySelector('.toast')
+
+    if (toastEl) {
+      initializeToast(toastEl)
+    }
 
     firebase.auth().onAuthStateChanged(async (user) => {
       if (user) {
@@ -236,7 +243,10 @@ function App() {
                 type="button"
                 className="btn btn-outline-primary btn-sm"
                 title="save"
-                onClick={() => save(user)}
+                onClick={() => {
+                  save(user)
+                  openToast('保存しました')
+                }}
               >
                 <i className="fa fa-save" />
               </button>
@@ -266,7 +276,7 @@ function App() {
         </div>
       </header>
       <div>
-        <canvas ref={ref} width={canvasWidth} height={canvasHeight}></canvas>
+        <canvas ref={ref} width={canvasWidth} height={canvasHeight} />
       </div>
 
       {/* components */}
@@ -280,6 +290,8 @@ function App() {
         }}
       />
       <ConfigModal />
+
+      <Toast />
     </div>
   )
 }
