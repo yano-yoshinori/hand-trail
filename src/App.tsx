@@ -9,7 +9,7 @@ import './App.css'
 import Canvas, { listenModification } from './Canvas'
 import { FileModal } from './components/FileModal'
 import { User } from './types'
-import { HEADER_HEIGHT, MIN_RESOLUTION } from './constants/misc'
+import { HEADER_HEIGHT, MIN_RESOLUTION, SCROLL_BAR_WIDTH } from './constants/misc'
 import { getFiles, login, save } from './api'
 import { ConfigModal } from './components/ConfigModal'
 import { createHistoryInstance, getHistoryInstance } from './models/History'
@@ -18,7 +18,7 @@ import { initializeToast, openToast, Toast } from './components/Toast'
 
 const { innerWidth, innerHeight } = window
 
-const canvasWidth = innerWidth < MIN_RESOLUTION.width ? MIN_RESOLUTION.width : innerWidth
+// const canvasWidth = innerWidth < MIN_RESOLUTION.width ? MIN_RESOLUTION.width : innerWidth
 const canvasHeight = innerHeight < MIN_RESOLUTION.height ? MIN_RESOLUTION.height : innerHeight
 
 const PAINT_COLORS = [
@@ -126,6 +126,13 @@ function App() {
         style={{ width: '100%', height: 44, top: 0, zIndex: 1, backgroundColor: '#333' }}
       >
         <div className="d-flex align-items-center">
+          <input
+            type="text"
+            disabled
+            name="filename"
+            className="text-truncate me-2"
+            style={{ width: 160 }}
+          />
           <button
             type="button"
             className="btn btn-outline-secondary btn-sm me-2"
@@ -147,6 +154,7 @@ function App() {
               canvasRef.current?.clear()
               const input = document.querySelector('input[name=filename]') as HTMLInputElement
               input.value = ''
+              input.title = ''
             }}
           >
             <i className="fa fa-file" />
@@ -164,7 +172,7 @@ function App() {
             <i className="fa fa-undo" />
           </button>
 
-          <div className="btn-group">
+          <div className="btn-group me-4">
             {PAINT_COLORS.map(({ name, color }) => (
               <Fragment key={name}>
                 <input
@@ -181,40 +189,42 @@ function App() {
                 <label
                   htmlFor={`pen-color-${name}`}
                   title={name}
-                  className="btn btn-outline-primary btn-sm px-3"
+                  className="btn btn-outline-primary btn-sm"
+                  style={{ paddingLeft: '0.75rem', paddingRight: '0.75rem' }}
                 >
                   <i className="fas fa-tint" style={{ color }} />
                 </label>
               </Fragment>
             ))}
           </div>
+
+          <textarea
+            name="hiddenInput"
+            ref={inputRef}
+            className="form-control form-control-sm me-2 bg-secondary text-white"
+            // TODO 空のときは caret を transparent にする
+            style={{
+              width: 200,
+              height: '1rem',
+              caretColor: 'lightgray',
+              border: 'darkgray',
+              resize: 'none',
+            }}
+            onKeyDown={(e) => {
+              if (e.key === 'Tab') {
+                e.preventDefault()
+              }
+            }}
+            onBlur={() => {
+              if (fileOperationMode) return
+
+              setTimeout(() => {
+                inputRef.current?.focus()
+              })
+            }}
+          />
         </div>
 
-        <textarea
-          name="hiddenInput"
-          ref={inputRef}
-          className="form-control form-control-sm me-2 bg-secondary text-white"
-          // TODO 空のときは caret を transparent にする
-          style={{
-            width: 200,
-            height: '1rem',
-            caretColor: 'lightgray',
-            border: 'darkgray',
-            resize: 'none',
-          }}
-          onKeyDown={(e) => {
-            if (e.key === 'Tab') {
-              e.preventDefault()
-            }
-          }}
-          onBlur={() => {
-            if (fileOperationMode) return
-
-            setTimeout(() => {
-              inputRef.current?.focus()
-            })
-          }}
-        />
         <div className="d-flex">
           {user.displayName ? (
             <>
@@ -276,7 +286,7 @@ function App() {
         </div>
       </header>
       <div>
-        <canvas ref={ref} width={canvasWidth} height={canvasHeight} />
+        <canvas ref={ref} width={innerWidth - SCROLL_BAR_WIDTH} height={canvasHeight} />
       </div>
 
       {/* components */}

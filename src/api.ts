@@ -15,6 +15,7 @@ export async function loadFile(name: string, uid: string) {
 
   const input = document.querySelector('input[name=filename]') as HTMLInputElement
   input.value = doc.id
+  input.title = doc.id
 }
 
 export async function save(user: User) {

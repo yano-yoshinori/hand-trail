@@ -263,12 +263,15 @@ export default class Canvas {
 
       if (isMoved || !lastText) {
         if (text) {
+          const sFontSize = localStorage.getItem(STORAGE_KEYS.fontSize)
+          const fontSize = sFontSize ? Number(sFontSize) : DEFAULT_TEXT_SIZE
+
           isMoved = false
           textbox = new fabric.Textbox(text, {
             lockUniScaling: true,
             hasControls: false, // TODO select mode にしたときは true にする
             fill: editor.freeDrawingBrush.color,
-            fontSize: DEFAULT_TEXT_SIZE,
+            fontSize,
             // editable: false,
           })
           textbox.set('left', mousePos.x + 2)
