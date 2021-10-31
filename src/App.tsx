@@ -9,7 +9,7 @@ import './App.css'
 import Canvas, { listenModification } from './Canvas'
 import { FileModal } from './components/FileModal'
 import { FileSummary, User } from './types'
-import { HEADER_HEIGHT, MIN_RESOLUTION, SCROLL_BAR_WIDTH } from './constants/misc'
+import { HEADER_HEIGHT, SCROLL_BAR_WIDTH, STORAGE_KEYS } from './constants/misc'
 import { getFiles, login, save } from './api'
 import { ConfigModal } from './components/ConfigModal'
 import { createHistoryInstance, getHistoryInstance } from './models/History'
@@ -20,7 +20,9 @@ import { IS_ANDROID, IS_IPAD, IS_MAC } from './util'
 const { innerWidth, innerHeight } = window
 
 // const canvasWidth = innerWidth < MIN_RESOLUTION.width ? MIN_RESOLUTION.width : innerWidth
-const canvasHeight = innerHeight < MIN_RESOLUTION.height ? MIN_RESOLUTION.height : innerHeight
+
+const sCanvasHeight = localStorage.getItem(STORAGE_KEYS.canvasHeight)
+const canvasHeight = sCanvasHeight ? Number(sCanvasHeight) : innerHeight
 
 const PAINT_COLORS = [
   {
@@ -167,6 +169,7 @@ function App() {
 
           <textarea
             name="hiddenInput"
+            hidden={IS_IPAD || IS_ANDROID}
             ref={inputRef}
             className="form-control form-control-sm me-2 bg-secondary text-white"
             // TODO 空のときは caret を transparent にする
@@ -281,6 +284,9 @@ function App() {
                 title="config"
                 data-bs-toggle="modal"
                 data-bs-target="#config-modal"
+                onClick={() => {
+                  updateFileOperationMode(true)
+                }}
               >
                 <i className="fa fa-cog" />
               </button>
@@ -311,7 +317,13 @@ function App() {
           canvasRef.current?.addPixy()
         }}
       />
-      <ConfigModal />
+      <ConfigModal
+        onClickClose={() => {
+          updateFileOperationMode(false)
+          inputRef.current?.focus()
+          canvasRef.current?.addPixy()
+        }}
+      />
 
       <Toast />
     </div>

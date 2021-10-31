@@ -47,6 +47,7 @@ const FABRIC_CANVAS_OPTIONS = {
   selectionFullyContained: true,
   backgroundColor: '#545554',
   // imageSmoothingEnabled: true,
+  // allowTouchScrolling: IS_IPAD || IS_ANDROID,
 }
 
 const FREE_DRAWING_BRUSH_PROPS = {
