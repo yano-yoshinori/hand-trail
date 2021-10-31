@@ -274,8 +274,7 @@ export default class Canvas {
             fontSize,
             // editable: false,
           })
-          textbox.set('left', mousePos.x + 2)
-          textbox.set('top', mousePos.y + 46)
+          textbox.set({ left: mousePos.x + 2, top: mousePos.y + 46 })
           editor.add(textbox)
           editor.setActiveObject(textbox)
           lastText = textbox
@@ -294,6 +293,9 @@ export default class Canvas {
 
           textbox = lastText
           textbox.set('text', text)
+
+          // NOTE: 漢字変換前のひらがな入力でできた余白をなくすため
+          textbox.set('width', 0)
         } else {
           editor.remove(lastText)
           lastText = null
