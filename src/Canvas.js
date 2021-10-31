@@ -71,6 +71,8 @@ export default class Canvas {
     editor.on('selection:updated', handleSelectionChange)
     // editor.on('selection:cleared', this.handleSelectionClear)
 
+    let lastLines = []
+
     editor.on('path:created', (e) => {
       const { path } = e
 
@@ -90,6 +92,8 @@ export default class Canvas {
           getHistoryInstance().push({ type: 'created', targets: [line] })
           line.on('removed', createListen('removed', [line]))
           listenModification(line)
+
+          lastLines.push(line)
         }
 
         this.lastFreeDrawingPos = {
@@ -104,14 +108,14 @@ export default class Canvas {
 
         editor.remove(path)
         return
-      } else {
-        this.lastFreeDrawingPos = null
-        this.lastFreeDrawingCircle.set('opacity', 0)
-
-        getHistoryInstance().push({ type: 'created', targets: [path] })
-        path.on('removed', createListen('removed', [path]))
-        listenModification(path)
       }
+
+      this.lastFreeDrawingPos = null
+      this.lastFreeDrawingCircle.set('opacity', 0)
+
+      getHistoryInstance().push({ type: 'created', targets: [path] })
+      path.on('removed', createListen('removed', [path]))
+      listenModification(path)
 
       // ずれないように 1 を足す
       const ADJUSTMENT = 1
@@ -134,6 +138,13 @@ export default class Canvas {
           path.set('strokeWidth', FREE_DRAWING_BRUSH_PROPS.width)
         })
       }
+    })
+
+    editor.on('mouse:dblclick', (e) => {
+      editor.remove(lastLines.pop())
+      editor.remove(lastLines.pop())
+
+      lastLines.length = 0
     })
 
     var lastTextPos = { x: 0, y: 0 },
