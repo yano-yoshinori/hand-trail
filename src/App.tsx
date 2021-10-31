@@ -8,7 +8,7 @@ import _ from 'lodash'
 import './App.css'
 import Canvas, { listenModification } from './Canvas'
 import { FileModal } from './components/FileModal'
-import { User } from './types'
+import { FileSummary, User } from './types'
 import { HEADER_HEIGHT, MIN_RESOLUTION, SCROLL_BAR_WIDTH } from './constants/misc'
 import { getFiles, login, save } from './api'
 import { ConfigModal } from './components/ConfigModal'
@@ -88,7 +88,7 @@ function App() {
   const inputRef = useRef<HTMLTextAreaElement>(null)
   const canvasRef = useRef<Canvas>()
   const [user, updateUser] = useState<User>({ uid: '', displayName: '' })
-  const [files, updateFiles] = useState<string[]>([])
+  const [files, updateFiles] = useState<FileSummary[]>([])
   const [currentColor, setCurrentColor] = useState<string>('white')
   const [fileOperationMode, updateFileOperationMode] = useState<boolean>(false)
   const [undoEnabled, setUndoEnabled] = useState(false)
@@ -126,45 +126,9 @@ function App() {
         style={{ width: '100%', height: 44, top: 0, zIndex: 1, backgroundColor: '#333' }}
       >
         <div className="d-flex align-items-center">
-          <input
-            type="text"
-            disabled
-            name="filename"
-            className="text-truncate me-2"
-            style={{ width: 160 }}
-          />
-          <button
-            type="button"
-            className="btn btn-outline-secondary btn-sm me-2"
-            title="file menu"
-            data-bs-toggle="modal"
-            data-bs-target="#file-modal"
-            onClick={async () => {
-              updateFileOperationMode(true)
-              const files = await getFiles(user)
-              updateFiles(files)
-            }}
-          >
-            <i className="fa fa-folder" />
-          </button>
-          <button
-            className="btn btn-outline-secondary btn-sm me-4"
-            title="new"
-            onClick={() => {
-              canvasRef.current?.clear()
-              const inputs = document.querySelectorAll('input[name=filename]') as NodeListOf<HTMLInputElement>
-              inputs.forEach((input)=>{
-                input.value = ''
-                input.title = ''  
-              })
-            }}
-          >
-            <i className="fa fa-file" />
-          </button>
-
           <button
             title="undo"
-            className="btn btn-outline-primary btn-sm me-2"
+            className="btn btn-outline-secondary btn-sm me-2"
             disabled={!undoEnabled}
             onClick={() => {
               const length = getHistoryInstance().undo()
@@ -191,7 +155,7 @@ function App() {
                 <label
                   htmlFor={`pen-color-${name}`}
                   title={name}
-                  className="btn btn-outline-primary btn-sm"
+                  className="btn btn-outline-secondary btn-sm"
                   style={{ paddingLeft: '0.75rem', paddingRight: '0.75rem' }}
                 >
                   <i className="fas fa-tint" style={{ color }} />
@@ -230,6 +194,60 @@ function App() {
         <div className="d-flex">
           {user.displayName ? (
             <>
+              {/* new */}
+              <button
+                className="btn btn-outline-secondary btn-sm me-2"
+                title="new"
+                onClick={() => {
+                  canvasRef.current?.clear()
+                  const inputs = document.querySelectorAll(
+                    'input[name=filename]'
+                  ) as NodeListOf<HTMLInputElement>
+                  inputs.forEach((input) => {
+                    input.value = ''
+                    input.title = ''
+                  })
+                }}
+              >
+                <i className="fa fa-file" />
+              </button>
+
+              {/* open */}
+              <button
+                type="button"
+                className="btn btn-outline-secondary btn-sm me-2"
+                title="file menu"
+                data-bs-toggle="modal"
+                data-bs-target="#file-modal"
+                onClick={async () => {
+                  updateFileOperationMode(true)
+                  const files = await getFiles(user)
+                  updateFiles(files)
+                }}
+              >
+                <i className="fa fa-folder" />
+              </button>
+              {/* file name */}
+              <input
+                type="text"
+                disabled
+                name="filename"
+                className="text-truncate me-2"
+                style={{ width: 160 }}
+              />
+              {/* save */}
+              <button
+                type="button"
+                className="btn btn-outline-secondary btn-sm me-2"
+                title="save"
+                onClick={() => {
+                  save(user)
+                  openToast('保存しました')
+                }}
+              >
+                <i className="fa fa-save" />
+              </button>
+              {/* export */}
               <button
                 type="button"
                 className="btn btn-outline-secondary btn-sm me-2"
@@ -251,20 +269,11 @@ function App() {
               >
                 <i className="fa fa-download" />
               </button>
-              <button
-                type="button"
-                className="btn btn-outline-primary btn-sm"
-                title="save"
-                onClick={() => {
-                  save(user)
-                  openToast('保存しました')
-                }}
-              >
-                <i className="fa fa-save" />
-              </button>
-              <span className="pt-1 mx-2 text-white" title={user.displayName}>
+              {/* user name */}
+              <span className="pt-1 me-2 text-white" title={user.displayName}>
                 {user.displayName.substr(0, 1)}
               </span>
+              {/* config */}
               <button
                 type="button"
                 className="btn btn-outline-secondary btn-sm"
@@ -278,7 +287,7 @@ function App() {
           ) : (
             <button
               type="button"
-              className="btn btn-outline-primary btn-sm ms-2"
+              className="btn btn-outline-secondary btn-sm ms-2"
               title="login"
               onClick={() => login(updateUser)}
             >

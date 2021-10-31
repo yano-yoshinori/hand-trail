@@ -1,9 +1,10 @@
 import { loadFile, save } from '../api'
-import { User } from '../types'
+import { FileSummary, User } from '../types'
+import { formatDate } from '../util'
 import { openToast } from './Toast'
 
 interface Props {
-  files: string[]
+  files: FileSummary[]
   user: User
   onClickClose: () => void
 }
@@ -50,7 +51,7 @@ export const FileModal = ({ files, user, onClickClose }: Props) => {
               className="list-group text-start"
               style={{ height: window.innerHeight - 266, overflowY: 'scroll' }}
             >
-              {files.map((name: string) => (
+              {files.map(({ name, timestamp }) => (
                 <button
                   key={name}
                   type="button"
@@ -59,7 +60,10 @@ export const FileModal = ({ files, user, onClickClose }: Props) => {
                     loadFile(name, user.uid)
                   }}
                 >
-                  {name}
+                  <div className="d-flex justify-content-between">
+                    <span>{name}</span>
+                    <span className="text-black-50">{formatDate(timestamp)}</span>
+                  </div>
                 </button>
               ))}
             </div>

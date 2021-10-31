@@ -1,7 +1,7 @@
 import firebase from 'firebase/app'
 import 'firebase/auth'
 import 'firebase/firestore'
-import { User, File } from './types'
+import { User, File, FileSummary } from './types'
 
 export async function loadFile(name: string, uid: string) {
   const db = firebase.firestore()
@@ -62,10 +62,16 @@ export function login(updateUser: (user: User) => void) {
     })
 }
 
-export async function getFiles(user: User): Promise<string[]> {
+export async function getFiles(user: User): Promise<FileSummary[]> {
   const db = firebase.firestore()
   const ref = await db.collection(`users/${user.uid}/drawordFiles`).orderBy('date', 'desc')
   const querySnapshot = await ref.get()
-  const data = querySnapshot.docs.map((doc) => doc.id) as string[]
+  const data = querySnapshot.docs.map((doc) => {
+    const docData = doc.data()
+    return {
+      name: doc.id,
+      timestamp: docData.date.seconds * 1000,
+    }
+  }) as FileSummary[]
   return data
 }
