@@ -14,7 +14,7 @@ import { getFiles, login, save } from './api'
 import { ConfigModal } from './components/ConfigModal'
 import { createHistoryInstance, getHistoryInstance } from './models/History'
 import { upload } from './models/Upload'
-import { initializeToast, openToast, Toast } from './components/Toast'
+import { closeToast, initializeToast, openToast, Toast } from './components/Toast'
 
 const { innerWidth, innerHeight } = window
 
@@ -61,6 +61,8 @@ document.onpaste = async function (e: ClipboardEvent) {
     return
   }
 
+  openToast('Uploading...', false)
+
   const { mousePos, editor, user }: any = global
 
   const blob = item.getAsFile()
@@ -80,6 +82,8 @@ document.onpaste = async function (e: ClipboardEvent) {
     editor.renderAll()
     getHistoryInstance().push({ type: 'created', targets: [image] })
     listenModification(image)
+
+    closeToast()
   })
 }
 
