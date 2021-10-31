@@ -152,9 +152,11 @@ function App() {
             title="new"
             onClick={() => {
               canvasRef.current?.clear()
-              const input = document.querySelector('input[name=filename]') as HTMLInputElement
-              input.value = ''
-              input.title = ''
+              const inputs = document.querySelectorAll('input[name=filename]') as NodeListOf<HTMLInputElement>
+              inputs.forEach((input)=>{
+                input.value = ''
+                input.title = ''  
+              })
             }}
           >
             <i className="fa fa-file" />

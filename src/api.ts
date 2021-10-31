@@ -13,14 +13,20 @@ export async function loadFile(name: string, uid: string) {
   editor.clear()
   editor.loadFromJSON(JSON.parse(file.data))
 
-  const input = document.querySelector('input[name=filename]') as HTMLInputElement
-  input.value = doc.id
-  input.title = doc.id
+  const inputs = document.querySelectorAll('input[name=filename]') as NodeListOf<HTMLInputElement>
+  inputs.forEach((input) => {
+    input.value = doc.id
+    input.title = doc.id
+  })
 }
 
 export async function save(user: User) {
-  const input = document.querySelector('input[name=filename]') as HTMLInputElement
+  const input = document.querySelector('#file-modal input[name=filename]') as HTMLInputElement
   const name = input.value
+
+  const inputInHeader = document.querySelector('header input[name=filename]') as HTMLInputElement
+  inputInHeader.value = name
+  inputInHeader.title = name
 
   if (!name) {
     alert('ファイル名が入力されていません')
