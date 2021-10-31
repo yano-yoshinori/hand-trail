@@ -19,3 +19,12 @@ export const formatDate = (timestamp: number) => {
   // 今年じゃない
   return `${time.getFullYear()}/${time.getMonth() + 1}/${time.getDate()}`
 }
+
+const { userAgent, maxTouchPoints } = navigator
+const lowerUserAgent = userAgent.toLowerCase()
+
+export const IS_IPAD =
+  Boolean(lowerUserAgent.match(/ipad/)) ||
+  (Boolean(lowerUserAgent.match(/macintosh/)) && maxTouchPoints && maxTouchPoints > 1)
+export const IS_ANDROID = Boolean(lowerUserAgent.match(/android/))
+export const IS_MAC = Boolean(lowerUserAgent.match(/macintosh/))

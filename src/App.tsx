@@ -15,6 +15,7 @@ import { ConfigModal } from './components/ConfigModal'
 import { createHistoryInstance, getHistoryInstance } from './models/History'
 import { upload } from './models/Upload'
 import { closeToast, initializeToast, openToast, Toast } from './components/Toast'
+import { IS_ANDROID, IS_IPAD, IS_MAC } from './util'
 
 const { innerWidth, innerHeight } = window
 
@@ -40,11 +41,7 @@ const PAINT_COLORS = [
   },
 ] as const
 
-// function undo() {
-//   const { editor }: any = global
-//   const item = editor.item(editor.size() - 1)
-//   editor.remove(item)
-// }
+const scrollBarWidth = IS_IPAD || IS_ANDROID || IS_MAC ? 0 : SCROLL_BAR_WIDTH
 
 document.onpaste = async function (e: ClipboardEvent) {
   if (!e.clipboardData) return
@@ -301,7 +298,7 @@ function App() {
         </div>
       </header>
       <div>
-        <canvas ref={ref} width={innerWidth - SCROLL_BAR_WIDTH} height={canvasHeight} />
+        <canvas ref={ref} width={innerWidth - scrollBarWidth} height={canvasHeight} />
       </div>
 
       {/* components */}
