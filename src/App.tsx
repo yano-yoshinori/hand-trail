@@ -15,7 +15,7 @@ import { ConfigModal } from './components/ConfigModal'
 import { createHistoryInstance, getHistoryInstance } from './models/History'
 import { upload } from './models/Upload'
 import { closeToast, initializeToast, openToast, Toast } from './components/Toast'
-import { IS_ANDROID, IS_IPAD, IS_MAC } from './util'
+import { IS_ANDROID, IS_IPAD, IS_IPHONE, IS_MAC } from './util'
 
 const { innerWidth, innerHeight } = window
 
@@ -43,7 +43,7 @@ const PAINT_COLORS = [
   },
 ] as const
 
-const scrollBarWidth = IS_IPAD || IS_ANDROID || IS_MAC ? 0 : SCROLL_BAR_WIDTH
+const scrollBarWidth = IS_IPHONE || IS_IPAD || IS_ANDROID || IS_MAC ? 0 : SCROLL_BAR_WIDTH
 
 document.onpaste = async function (e: ClipboardEvent) {
   if (!e.clipboardData) return
@@ -169,7 +169,7 @@ function App() {
 
           <textarea
             name="hiddenInput"
-            hidden={IS_IPAD || IS_ANDROID}
+            hidden={IS_IPHONE || IS_IPAD || IS_ANDROID}
             ref={inputRef}
             className="form-control form-control-sm me-2 bg-secondary text-white"
             // TODO 空のときは caret を transparent にする

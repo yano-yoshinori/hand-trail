@@ -23,6 +23,7 @@ export const formatDate = (timestamp: number) => {
 const { userAgent, maxTouchPoints } = navigator
 const lowerUserAgent = userAgent.toLowerCase()
 
+export const IS_IPHONE = Boolean(lowerUserAgent.match(/iphone/))
 export const IS_IPAD =
   Boolean(lowerUserAgent.match(/ipad/)) ||
   (Boolean(lowerUserAgent.match(/macintosh/)) && maxTouchPoints && maxTouchPoints > 1)
