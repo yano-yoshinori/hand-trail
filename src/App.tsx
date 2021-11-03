@@ -1,4 +1,4 @@
-import { Fragment, useEffect, useRef, useState } from 'react'
+import { Fragment, useEffect, useRef, useState, KeyboardEvent } from 'react'
 import firebase from 'firebase/app'
 import 'firebase/auth'
 import 'firebase/firestore'
@@ -24,6 +24,9 @@ const { innerWidth, innerHeight } = window
 
 const sCanvasHeight = localStorage.getItem(STORAGE_KEYS.canvasHeight)
 const canvasHeight = sCanvasHeight ? Number(sCanvasHeight) : innerHeight
+
+// 連続射出機能
+let textRepeat = 0
 
 const PAINT_COLORS = [
   {
@@ -70,14 +73,13 @@ document.onpaste = async function (e: ClipboardEvent) {
 
   const image = new fabric.Image()
   image.setSrc(url, function () {
-    const width = image.get('width') ?? 0
-    const height = image.get('height') ?? 0
     image.set({
-      left: mousePos.x + width / 2,
-      top: mousePos.y + height / 2 + HEADER_HEIGHT,
+      left: mousePos.x,
+      top: mousePos.y + HEADER_HEIGHT,
       originX: 'center',
       originY: 'center',
     })
+    image.sendToBack()
     editor.add(image)
     editor.renderAll()
     getHistoryInstance().push({ type: 'created', targets: [image] })
@@ -89,7 +91,8 @@ document.onpaste = async function (e: ClipboardEvent) {
 
 function App() {
   const ref = useRef<HTMLCanvasElement>(null)
-  const inputRef = useRef<HTMLTextAreaElement>(null)
+  const textareaRef = useRef<HTMLTextAreaElement>(null)
+  const inputRef = useRef<HTMLInputElement>(null)
   const canvasRef = useRef<Canvas>()
   const [user, updateUser] = useState<User>({ uid: '', displayName: '' })
   const [files, updateFiles] = useState<FileSummary[]>([])
@@ -102,7 +105,7 @@ function App() {
   useEffect(() => {
     canvasRef.current = new Canvas(ref.current)
 
-    inputRef.current?.focus()
+    textareaRef.current?.focus()
 
     createHistoryInstance((enabled: boolean) => {
       setUndoEnabled(enabled)
@@ -142,7 +145,7 @@ function App() {
   return (
     <div className="text-center">
       <header
-        className="position-fixed px-2 d-flex justify-content-between align-items-center"
+        className="px-2 d-flex justify-content-between align-items-center"
         style={{ width: '100%', height: 44, top: 0, zIndex: 1, backgroundColor: '#333' }}
       >
         <div className="d-flex align-items-center">
@@ -246,11 +249,7 @@ function App() {
               if (zoomRef.current <= 0.5) return
 
               zoomRef.current -= 0.1
-              canvasRef.current?.zoom(
-                zoomRef.current,
-                innerWidth - scrollBarWidth,
-                innerHeight - HEADER_HEIGHT
-              )
+              canvasRef.current?.zoom(zoomRef.current, innerWidth - scrollBarWidth, innerHeight)
             }}
           >
             <i className="fa fa-search-minus" />
@@ -264,11 +263,7 @@ function App() {
               if (zoomRef.current <= 0.5) return
 
               zoomRef.current = 1
-              canvasRef.current?.zoom(
-                zoomRef.current,
-                innerWidth - scrollBarWidth,
-                innerHeight - HEADER_HEIGHT
-              )
+              canvasRef.current?.zoom(zoomRef.current, innerWidth - scrollBarWidth, innerHeight)
             }}
           >
             <i className="fa fa-search" />
@@ -282,11 +277,7 @@ function App() {
               if (zoomRef.current >= 2) return
 
               zoomRef.current += 0.1
-              canvasRef.current?.zoom(
-                zoomRef.current,
-                innerWidth - scrollBarWidth,
-                innerHeight - HEADER_HEIGHT
-              )
+              canvasRef.current?.zoom(zoomRef.current, innerWidth - scrollBarWidth, innerHeight)
             }}
           >
             <i className="fa fa-search-plus" />
@@ -335,7 +326,7 @@ function App() {
           <textarea
             name="hiddenInput"
             hidden={IS_IPHONE || IS_IPAD || IS_ANDROID}
-            ref={inputRef}
+            ref={textareaRef}
             className="form-control form-control-sm me-2 bg-secondary text-white"
             // TODO 空のときは caret を transparent にする
             style={{
@@ -345,8 +336,10 @@ function App() {
               border: 'darkgray',
               resize: 'none',
             }}
-            onKeyDown={(e) => {
-              if (e.key === 'Tab') {
+            onKeyDown={(e: KeyboardEvent<HTMLTextAreaElement>) => {
+              const { key } = e
+
+              if (key === 'Tab') {
                 e.preventDefault()
               }
             }}
@@ -354,8 +347,62 @@ function App() {
               if (fileOperationMode) return
 
               setTimeout(() => {
-                inputRef.current?.focus()
+                if (!inputRef.current || inputRef.current.style.width === '120px') return
+                textareaRef.current?.focus()
+              }, 100)
+            }}
+          />
+
+          {/* 連続射出 */}
+          <input
+            type="text"
+            ref={inputRef}
+            placeholder="連続射出"
+            className="form-control form-control-sm me-2 bg-secondary text-white"
+            style={{ width: 32 }}
+            onFocus={() => {
+              if (inputRef.current) {
+                inputRef.current.style.width = '120px'
+              }
+            }}
+            // onBlur={() => {
+            //   textRepeat = 0
+
+            //   if (inputRef.current) {
+            //     inputRef.current.size = 1
+            //   }
+
+            //   setTimeout(() => {
+            //     textareaRef.current?.focus()
+            //   })
+            // }}
+            onMouseOut={() => {
+              textRepeat = 0
+
+              if (inputRef.current) {
+                inputRef.current.style.width = '32px'
+              }
+
+              setTimeout(() => {
+                textareaRef.current?.focus()
               })
+            }}
+            onKeyDown={(e: KeyboardEvent<HTMLInputElement>) => {
+              const { key } = e
+
+              if (key === 'Enter') {
+                e.preventDefault()
+
+                // テキスト射出
+                const point = new fabric.Point(inputRef.current?.offsetLeft ?? 0, 0)
+                canvasRef.current?.createTextbox(inputRef.current?.value, point, textRepeat)
+
+                textRepeat += 1
+
+                if (inputRef.current) {
+                  inputRef.current.value = ''
+                }
+              }
             }}
           />
         </div>
@@ -415,14 +462,14 @@ function App() {
         user={user}
         onClickClose={() => {
           updateFileOperationMode(false)
-          inputRef.current?.focus()
+          textareaRef.current?.focus()
           canvasRef.current?.addPixy()
         }}
       />
       <ConfigModal
         onClickClose={() => {
           updateFileOperationMode(false)
-          inputRef.current?.focus()
+          textareaRef.current?.focus()
           canvasRef.current?.addPixy()
         }}
       />

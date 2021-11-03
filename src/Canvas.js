@@ -2,12 +2,7 @@ import _ from 'lodash'
 import { fabric } from 'fabric'
 
 import FabricCanvas from './fabric-components/FabricCanvas'
-import {
-  DEFAULT_TEXT_SIZE,
-  HEADER_HEIGHT,
-  STORAGE_KEYS,
-  STRAIGHT_LINE_THRESHOLD,
-} from './constants/misc'
+import { DEFAULT_TEXT_SIZE, STORAGE_KEYS, STRAIGHT_LINE_THRESHOLD } from './constants/misc'
 import { createListen, getHistoryInstance } from './models/History'
 
 var keycodes = {
@@ -76,6 +71,8 @@ export default class Canvas {
     editor.on('path:created', (e) => {
       const { path } = e
 
+      path.set('strokeUniform', true)
+
       if (path.path.length < STRAIGHT_LINE_THRESHOLD) {
         if (this.lastFreeDrawingPos) {
           const line = new fabric.Line(
@@ -85,6 +82,7 @@ export default class Canvas {
               strokeWidth: FREE_DRAWING_BRUSH_PROPS.width,
               originX: 'center',
               originY: 'center',
+              strokeUniform: true,
             }
           )
 
@@ -125,7 +123,7 @@ export default class Canvas {
 
       // 手書きはクリック領域が広いので、邪魔にならないように一番奥に送る
       // TODO これをすると最後のオブジェクトを削除が動かなくなる
-      path.sendToBack()
+      // path.sendToBack()
 
       if (localStorage.getItem(STORAGE_KEYS.perPixelTargetFind) === 'true') {
         path.perPixelTargetFind = true
@@ -275,25 +273,9 @@ export default class Canvas {
 
       if (isMoved || !lastText) {
         if (text) {
-          const sFontSize = localStorage.getItem(STORAGE_KEYS.fontSize)
-          const fontSize = sFontSize ? Number(sFontSize) : DEFAULT_TEXT_SIZE
-
           isMoved = false
-          textbox = new fabric.Textbox(text, {
-            lockUniScaling: true,
-            hasControls: false, // TODO select mode にしたときは true にする
-            fill: editor.freeDrawingBrush.color,
-            fontSize,
-            // editable: false,
-          })
-          textbox.set({ left: mousePos.x + 2, top: mousePos.y + 46 })
-          editor.add(textbox)
-          editor.setActiveObject(textbox)
+          textbox = this.createTextbox(text, mousePos)
           lastText = textbox
-
-          getHistoryInstance().push({ type: 'created', targets: [textbox] })
-          textbox.on('removed', createListen('removed', [textbox]))
-          listenModification(textbox)
         }
       } else {
         if (text) {
@@ -324,7 +306,7 @@ export default class Canvas {
 
     body.addEventListener('mousemove', (e) => {
       mousePos.x = e.pageX
-      mousePos.y = e.pageY - HEADER_HEIGHT
+      mousePos.y = e.pageY - 86
 
       global.mousePos = mousePos
 
@@ -429,6 +411,38 @@ export default class Canvas {
   zoom(value, width, height) {
     const point = new fabric.Point(width / 2, height / 2)
     editor.zoomToPoint(point, value)
+  }
+
+  createTextbox(text, mousePos, rows) {
+    const sFontSize = localStorage.getItem(STORAGE_KEYS.fontSize)
+    const fontSize = sFontSize ? Number(sFontSize) : DEFAULT_TEXT_SIZE
+
+    const textbox = new fabric.Textbox(text, {
+      lockUniScaling: true,
+      hasControls: false, // TODO select mode にしたときは true にする
+      fill: editor.freeDrawingBrush.color,
+      fontSize,
+      // editable: false,
+    })
+
+    let point
+
+    if (rows !== undefined) {
+      point = new fabric.Point(mousePos.x, 30 + textbox.get('height') * 1.5 * rows)
+    } else {
+      point = mousePos
+      point.y += 46
+    }
+
+    textbox.set({ left: point.x + 2, top: point.y })
+    editor.add(textbox)
+    editor.setActiveObject(textbox)
+
+    getHistoryInstance().push({ type: 'created', targets: [textbox] })
+    textbox.on('removed', createListen('removed', [textbox]))
+    listenModification(textbox)
+
+    return textbox
   }
 }
 

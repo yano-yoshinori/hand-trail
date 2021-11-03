@@ -46,7 +46,7 @@ class Histories {
 
   getLastValue(object: fabric.Object) {
     const found = this.lastValues.find((value) => value.target === object)
-    console.log(found)
+    // console.log(found)
     return found
   }
 
