@@ -4,6 +4,7 @@ import 'firebase/auth'
 import 'firebase/firestore'
 import { fabric } from 'fabric'
 import _ from 'lodash'
+import { Dropdown } from 'bootstrap'
 
 import './App.css'
 import Canvas, { listenModification } from './Canvas'
@@ -95,6 +96,8 @@ function App() {
   const [currentColor, setCurrentColor] = useState<string>('white')
   const [fileOperationMode, updateFileOperationMode] = useState<boolean>(false)
   const [undoEnabled, setUndoEnabled] = useState(false)
+  const zoomRef = useRef(1)
+  const dropdownRef = useRef<Dropdown>()
 
   useEffect(() => {
     canvasRef.current = new Canvas(ref.current)
@@ -120,6 +123,20 @@ function App() {
         // No user is signed in.
       }
     })
+
+    const dropdownEl = document.querySelector('.dropdown-toggle') as HTMLDivElement
+    dropdownRef.current = new Dropdown(dropdownEl)
+
+    function resize() {
+      const { innerWidth } = window
+      canvasRef.current?.resize(innerWidth - scrollBarWidth, canvasHeight)
+    }
+
+    window.addEventListener('resize', resize)
+
+    return () => {
+      window.removeEventListener('resize', resize)
+    }
   }, [])
 
   return (
@@ -129,6 +146,153 @@ function App() {
         style={{ width: '100%', height: 44, top: 0, zIndex: 1, backgroundColor: '#333' }}
       >
         <div className="d-flex align-items-center">
+          {/* file menu */}
+          <div className="dropdown">
+            <button
+              className="btn btn-outline-secondary btn-sm dropdown-toggle me-2"
+              type="button"
+              data-bs-toggle="dropdown"
+              onClick={() => {
+                dropdownRef.current?.show()
+              }}
+            >
+              File
+            </button>
+            <ul className="dropdown-menu">
+              {/* new */}
+              <li>
+                <button
+                  className="dropdown-item"
+                  title="new"
+                  onClick={() => {
+                    const result = window.confirm('クリアします。よろしいですか？')
+
+                    if (!result) return
+
+                    canvasRef.current?.clear()
+                    const inputs = document.querySelectorAll(
+                      'input[name=filename]'
+                    ) as NodeListOf<HTMLInputElement>
+                    inputs.forEach((input) => {
+                      input.value = ''
+                      input.title = ''
+                    })
+                  }}
+                >
+                  {/* <i className="fa fa-file me-1" /> */}
+                  New
+                </button>
+              </li>
+              {/* open */}
+              <li>
+                <button
+                  type="button"
+                  className="dropdown-item"
+                  title="file menu"
+                  data-bs-toggle="modal"
+                  data-bs-target="#file-modal"
+                  onClick={async () => {
+                    updateFileOperationMode(true)
+                    const files = await getFiles(user)
+                    updateFiles(files)
+                  }}
+                >
+                  {/* <i className="fa fa-folder" /> */}
+                  Open
+                </button>
+              </li>
+              {/* export */}
+              <li>
+                <button
+                  type="button"
+                  className="dropdown-item"
+                  title="export"
+                  onClick={() => {
+                    const url = ref.current?.toDataURL()
+
+                    const input = document.querySelector('input[name=filename]') as HTMLInputElement
+                    const name = input.value
+
+                    if (!url || !name) return
+
+                    const a = document.createElement('a')
+                    a.href = url
+                    a.download = `${name}.png`
+                    a.click()
+                    a.remove()
+                  }}
+                >
+                  {/* <i className="fa fa-download me-1" /> */}
+                  Export
+                </button>
+              </li>
+            </ul>
+          </div>
+
+          {/* file name */}
+          <input
+            type="text"
+            disabled
+            name="filename"
+            className="text-truncate me-2"
+            style={{ width: 160 }}
+          />
+
+          {/* zoom out */}
+          <button
+            title="zoom out"
+            className="btn btn-outline-secondary btn-sm me-2"
+            onClick={() => {
+              if (zoomRef.current <= 0.5) return
+
+              zoomRef.current -= 0.1
+              canvasRef.current?.zoom(
+                zoomRef.current,
+                innerWidth - scrollBarWidth,
+                innerHeight - HEADER_HEIGHT
+              )
+            }}
+          >
+            <i className="fa fa-search-minus" />
+          </button>
+
+          {/* zoom reset */}
+          <button
+            title="zoom reset"
+            className="btn btn-outline-secondary btn-sm me-2"
+            onClick={() => {
+              if (zoomRef.current <= 0.5) return
+
+              zoomRef.current = 1
+              canvasRef.current?.zoom(
+                zoomRef.current,
+                innerWidth - scrollBarWidth,
+                innerHeight - HEADER_HEIGHT
+              )
+            }}
+          >
+            <i className="fa fa-search" />
+          </button>
+
+          {/* zoom in */}
+          <button
+            title="zoom in"
+            className="btn btn-outline-secondary btn-sm me-2"
+            onClick={() => {
+              if (zoomRef.current >= 2) return
+
+              zoomRef.current += 0.1
+              canvasRef.current?.zoom(
+                zoomRef.current,
+                innerWidth - scrollBarWidth,
+                innerHeight - HEADER_HEIGHT
+              )
+            }}
+          >
+            <i className="fa fa-search-plus" />
+          </button>
+
+          {/* undo */}
           <button
             title="undo"
             className="btn btn-outline-secondary btn-sm me-2"
@@ -141,6 +305,7 @@ function App() {
             <i className="fa fa-undo" />
           </button>
 
+          {/* colors */}
           <div className="btn-group me-4">
             {PAINT_COLORS.map(({ name, color }) => (
               <Fragment key={name}>
@@ -198,51 +363,10 @@ function App() {
         <div className="d-flex">
           {user.displayName ? (
             <>
-              {/* new */}
-              <button
-                className="btn btn-outline-secondary btn-sm me-2"
-                title="new"
-                onClick={() => {
-                  canvasRef.current?.clear()
-                  const inputs = document.querySelectorAll(
-                    'input[name=filename]'
-                  ) as NodeListOf<HTMLInputElement>
-                  inputs.forEach((input) => {
-                    input.value = ''
-                    input.title = ''
-                  })
-                }}
-              >
-                <i className="fa fa-file" />
-              </button>
-
-              {/* open */}
-              <button
-                type="button"
-                className="btn btn-outline-secondary btn-sm me-2"
-                title="file menu"
-                data-bs-toggle="modal"
-                data-bs-target="#file-modal"
-                onClick={async () => {
-                  updateFileOperationMode(true)
-                  const files = await getFiles(user)
-                  updateFiles(files)
-                }}
-              >
-                <i className="fa fa-folder" />
-              </button>
-              {/* file name */}
-              <input
-                type="text"
-                disabled
-                name="filename"
-                className="text-truncate me-2"
-                style={{ width: 160 }}
-              />
               {/* save */}
               <button
                 type="button"
-                className="btn btn-outline-secondary btn-sm me-2"
+                className="btn btn-outline-primary btn-sm me-2"
                 title="save"
                 onClick={() => {
                   save(user)
@@ -250,28 +374,6 @@ function App() {
                 }}
               >
                 <i className="fa fa-save" />
-              </button>
-              {/* export */}
-              <button
-                type="button"
-                className="btn btn-outline-secondary btn-sm me-2"
-                title="export"
-                onClick={() => {
-                  const url = ref.current?.toDataURL()
-
-                  const input = document.querySelector('input[name=filename]') as HTMLInputElement
-                  const name = input.value
-
-                  if (!url || !name) return
-
-                  const a = document.createElement('a')
-                  a.href = url
-                  a.download = `${name}.png`
-                  a.click()
-                  a.remove()
-                }}
-              >
-                <i className="fa fa-download" />
               </button>
               {/* user name */}
               <span className="pt-1 me-2 text-white" title={user.displayName}>

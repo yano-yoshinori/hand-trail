@@ -420,6 +420,16 @@ export default class Canvas {
 
     editor.renderAll()
   }
+
+  resize(width, height) {
+    editor.setWidth(width)
+    editor.setHeight(height)
+  }
+
+  zoom(value, width, height) {
+    const point = new fabric.Point(width / 2, height / 2)
+    editor.zoomToPoint(point, value)
+  }
 }
 
 export function listenModification(target) {
