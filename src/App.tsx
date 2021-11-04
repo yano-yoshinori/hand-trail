@@ -358,6 +358,7 @@ function App() {
             type="text"
             ref={inputRef}
             placeholder="連続射出"
+            title="連続射出"
             className="form-control form-control-sm me-2 bg-secondary text-white"
             style={{ width: 32 }}
             onFocus={() => {

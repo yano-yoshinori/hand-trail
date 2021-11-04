@@ -29,3 +29,5 @@ export const IS_IPAD =
   (Boolean(lowerUserAgent.match(/macintosh/)) && maxTouchPoints && maxTouchPoints > 1)
 export const IS_ANDROID = Boolean(lowerUserAgent.match(/android/))
 export const IS_MAC = Boolean(lowerUserAgent.match(/macintosh/))
+
+export const IS_TOUCH_DEVICE = IS_IPHONE || IS_IPAD || IS_ANDROID

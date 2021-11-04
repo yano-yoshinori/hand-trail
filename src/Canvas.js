@@ -4,6 +4,7 @@ import { fabric } from 'fabric'
 import FabricCanvas from './fabric-components/FabricCanvas'
 import { DEFAULT_TEXT_SIZE, STORAGE_KEYS, STRAIGHT_LINE_THRESHOLD } from './constants/misc'
 import { createListen, getHistoryInstance } from './models/History'
+import { IS_TOUCH_DEVICE } from './util'
 
 var keycodes = {
   TAB: 9,
@@ -73,7 +74,7 @@ export default class Canvas {
 
       path.set('strokeUniform', true)
 
-      if (path.path.length < STRAIGHT_LINE_THRESHOLD) {
+      if (!IS_TOUCH_DEVICE && path.path.length < STRAIGHT_LINE_THRESHOLD) {
         if (this.lastFreeDrawingPos) {
           const line = new fabric.Line(
             [this.lastFreeDrawingPos.left, this.lastFreeDrawingPos.top, path.left, path.top],
