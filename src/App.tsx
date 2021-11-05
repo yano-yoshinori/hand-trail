@@ -72,21 +72,28 @@ document.onpaste = async function (e: ClipboardEvent) {
   const url = await upload(user.uid, Date.now().toFixed(), blob)
 
   const image = new fabric.Image()
-  image.setSrc(url, function () {
-    image.set({
-      left: mousePos.x,
-      top: mousePos.y + HEADER_HEIGHT,
-      originX: 'center',
-      originY: 'center',
-    })
-    image.sendToBack()
-    editor.add(image)
-    editor.renderAll()
-    getHistoryInstance().push({ type: 'created', targets: [image] })
-    listenModification(image)
+  image.setSrc(
+    url,
+    function () {
+      image.set({
+        left: mousePos.x,
+        top: mousePos.y + HEADER_HEIGHT,
+        originX: 'center',
+        originY: 'center',
+      })
+      image.sendToBack()
+      editor.add(image)
+      editor.renderAll()
+      getHistoryInstance().push({ type: 'created', targets: [image] })
+      listenModification(image)
 
-    closeToast()
-  })
+      closeToast()
+    },
+    // これでは解決しなかった
+    {
+      crossOrigin: 'anonymous',
+    }
+  )
 }
 
 function App() {
@@ -137,8 +144,15 @@ function App() {
 
     window.addEventListener('resize', resize)
 
+    function error(error: ErrorEvent) {
+      alert(`Error: ${JSON.stringify(error)}`)
+    }
+
+    window.addEventListener('error', error)
+
     return () => {
       window.removeEventListener('resize', resize)
+      window.removeEventListener('error', error)
     }
   }, [])
 
@@ -211,7 +225,14 @@ function App() {
                   className="dropdown-item"
                   title="export"
                   onClick={() => {
-                    const url = ref.current?.toDataURL()
+                    let url
+
+                    try {
+                      url = ref.current?.toDataURL()
+                    } catch (error) {
+                      alert(`Error: ${JSON.stringify(error)}`)
+                      return
+                    }
 
                     const input = document.querySelector('input[name=filename]') as HTMLInputElement
                     const name = input.value
