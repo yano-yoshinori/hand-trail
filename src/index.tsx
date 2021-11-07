@@ -8,23 +8,15 @@ import '@fortawesome/fontawesome-free/css/all.css'
 import './index.css'
 import App from './App'
 import reportWebVitals from './reportWebVitals'
-
-const {
-  REACT_APP_FIREBASE_API_KEY,
-  REACT_APP_FIREBASE_AUTH_DOMAIN,
-  REACT_APP_FIREBASE_PROJECT_ID,
-  REACT_APP_FIREBASE_STORAGE_BUCKET,
-  REACT_APP_FIREBASE_MESSAGING_SENDER_ID,
-  REACT_APP_FIREBASE_APP_ID,
-} = process.env
+import { ENV_VARS } from './models/EnvVars'
 
 const firebaseConfig = {
-  apiKey: REACT_APP_FIREBASE_API_KEY,
-  authDomain: REACT_APP_FIREBASE_AUTH_DOMAIN,
-  projectId: REACT_APP_FIREBASE_PROJECT_ID,
-  storageBucket: REACT_APP_FIREBASE_STORAGE_BUCKET,
-  messagingSenderId: REACT_APP_FIREBASE_MESSAGING_SENDER_ID,
-  appId: REACT_APP_FIREBASE_APP_ID,
+  apiKey: ENV_VARS.firebaseApiKey,
+  authDomain: ENV_VARS.firebaseAuthDomain,
+  projectId: ENV_VARS.firebaseProjectId,
+  storageBucket: ENV_VARS.firebaseStorageBucket,
+  messagingSenderId: ENV_VARS.firebaseMessagingSenderId,
+  appId: ENV_VARS.firebaseAppId,
 }
 
 // 開発時にリロードされてエラーになるのを回避する
