@@ -16,7 +16,7 @@ import { ConfigModal } from './components/ConfigModal'
 import { createHistoryInstance, getHistoryInstance } from './models/History'
 import { upload } from './models/Upload'
 import { closeToast, initializeToast, openToast, Toast } from './components/Toast'
-import { IS_ANDROID, IS_IPAD, IS_IPHONE, IS_MAC } from './util'
+import { IS_ANDROID, IS_IPAD, IS_IPHONE, IS_MAC, IS_TOUCH_DEVICE } from './util'
 
 const { innerWidth, innerHeight } = window
 
@@ -88,11 +88,11 @@ document.onpaste = async function (e: ClipboardEvent) {
       listenModification(image)
 
       closeToast()
-    },
-    // これでは解決しなかった
-    {
-      crossOrigin: 'anonymous',
     }
+    // これでは解決しなかった
+    // {
+    //   crossOrigin: 'anonymous',
+    // }
   )
 }
 
@@ -318,7 +318,7 @@ function App() {
           </button>
 
           {/* colors */}
-          <div className="btn-group me-4">
+          <div className="btn-group me-2">
             {PAINT_COLORS.map(({ name, color }) => (
               <Fragment key={name}>
                 <input
@@ -343,6 +343,26 @@ function App() {
               </Fragment>
             ))}
           </div>
+
+          {IS_TOUCH_DEVICE && (
+            <div className="form-check me-2">
+              <input
+                className="form-check-input"
+                type="checkbox"
+                id="modeForTablet"
+                onChange={() => {
+                  const { editor }: any = global
+
+                  editor.isDrawingMode = !editor.isDrawingMode
+                  editor.discardActiveObject()
+                  canvasRef.current?.switchPixy()
+                }}
+              />
+              <label className="form-check-label text-white" htmlFor="modeForTablet">
+                Select
+              </label>
+            </div>
+          )}
 
           <textarea
             name="hiddenInput"
