@@ -110,7 +110,10 @@ function App() {
   const dropdownRef = useRef<Dropdown>()
 
   useEffect(() => {
-    canvasRef.current = new Canvas(ref.current)
+    canvasRef.current = new Canvas(ref.current, {
+      width: innerWidth - scrollBarWidth,
+      height: canvasHeight,
+    })
 
     textareaRef.current?.focus()
 
@@ -159,8 +162,12 @@ function App() {
   return (
     <div className="text-center">
       <header
-        className="px-2 d-flex justify-content-between align-items-center"
-        style={{ width: '100%', height: 44, top: 0, zIndex: 1, backgroundColor: '#333' }}
+        className="px-2 d-flex justify-content-between align-items-center sticky-top"
+        style={{
+          width: '100%',
+          height: 44,
+          backgroundColor: '#333',
+        }}
       >
         <div className="d-flex align-items-center">
           {/* file menu */}
@@ -345,23 +352,42 @@ function App() {
           </div>
 
           {IS_TOUCH_DEVICE && (
-            <div className="form-check me-2">
-              <input
-                className="form-check-input"
-                type="checkbox"
-                id="modeForTablet"
-                onChange={() => {
+            <>
+              {/* mode switch */}
+              <div className="form-check me-2">
+                <input
+                  className="form-check-input"
+                  type="checkbox"
+                  id="modeForTablet"
+                  onChange={() => {
+                    const { editor }: any = global
+
+                    editor.isDrawingMode = !editor.isDrawingMode
+                    editor.discardActiveObject()
+                    canvasRef.current?.switchPixy()
+                  }}
+                />
+                <label className="form-check-label text-white" htmlFor="modeForTablet">
+                  Select
+                </label>
+              </div>
+              {/* trash */}
+              <button
+                title="trash"
+                className="btn btn-outline-secondary btn-sm me-2"
+                onClick={() => {
                   const { editor }: any = global
 
-                  editor.isDrawingMode = !editor.isDrawingMode
+                  const items = editor.getActiveObjects()
+                  items.forEach((item: any) => {
+                    editor.remove(item)
+                  })
                   editor.discardActiveObject()
-                  canvasRef.current?.switchPixy()
                 }}
-              />
-              <label className="form-check-label text-white" htmlFor="modeForTablet">
-                Select
-              </label>
-            </div>
+              >
+                <i className="fa fa-trash" />
+              </button>
+            </>
           )}
 
           <textarea
@@ -494,9 +520,7 @@ function App() {
           )}
         </div>
       </header>
-      <div>
-        <canvas ref={ref} width={innerWidth - scrollBarWidth} height={canvasHeight} />
-      </div>
+      <canvas ref={ref} />
 
       {/* components */}
       <FileModal

@@ -55,8 +55,8 @@ export default class Canvas {
   lastFreeDrawingPos = null
   lastFreeDrawingCircle = null
 
-  constructor(canvasEl) {
-    editor = new FabricCanvas(canvasEl, FABRIC_CANVAS_OPTIONS)
+  constructor(canvasEl, options) {
+    editor = new FabricCanvas(canvasEl, { ...FABRIC_CANVAS_OPTIONS, ...options })
     global.editor = editor
 
     const { color, width } = FREE_DRAWING_BRUSH_PROPS
