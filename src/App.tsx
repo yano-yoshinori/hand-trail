@@ -17,6 +17,7 @@ import { createHistoryInstance, getHistoryInstance } from './models/History'
 import { upload } from './models/Upload'
 import { closeToast, initializeToast, openToast, Toast } from './components/Toast'
 import { IS_ANDROID, IS_IPAD, IS_IPHONE, IS_MAC, IS_TOUCH_DEVICE } from './util'
+import { ENV_VARS } from './models/EnvVars'
 
 const { innerWidth, innerHeight } = window
 
@@ -127,19 +128,6 @@ function App() {
       initializeToast(toastEl)
     }
 
-    firebase.auth().onAuthStateChanged(async (user) => {
-      if (user) {
-        // User is signed in.
-        updateUser({ uid: user.uid, displayName: user.displayName || '' })
-        ;(global as any).user = user
-      } else {
-        // No user is signed in.
-      }
-    })
-
-    const dropdownEl = document.querySelector('.dropdown-toggle') as HTMLDivElement
-    dropdownRef.current = new Dropdown(dropdownEl)
-
     function resize() {
       const { innerWidth } = window
       canvasRef.current?.resize(innerWidth - scrollBarWidth, canvasHeight)
@@ -153,11 +141,30 @@ function App() {
 
     window.addEventListener('error', error)
 
+    if (ENV_VARS.env === 'local') {
+      return
+    }
+
+    const dropdownEl = document.querySelector('.dropdown-toggle') as HTMLDivElement
+    dropdownRef.current = new Dropdown(dropdownEl)
+
+    firebase.auth().onAuthStateChanged(async (user) => {
+      if (user) {
+        // User is signed in.
+        updateUser({ uid: user.uid, displayName: user.displayName || '' })
+        ;(global as any).user = user
+      } else {
+        // No user is signed in.
+      }
+    })
+
     return () => {
       window.removeEventListener('resize', resize)
       window.removeEventListener('error', error)
     }
   }, [])
+
+  const logined = Boolean(user.displayName)
 
   return (
     <div className="text-center">
@@ -171,103 +178,109 @@ function App() {
       >
         <div className="d-flex align-items-center">
           {/* file menu */}
-          <div className="dropdown">
-            <button
-              className="btn btn-outline-secondary btn-sm dropdown-toggle me-2"
-              type="button"
-              data-bs-toggle="dropdown"
-              onClick={() => {
-                dropdownRef.current?.show()
-              }}
-            >
-              File
-            </button>
-            <ul className="dropdown-menu">
-              {/* new */}
-              <li>
+          {logined && (
+            <>
+              <div className="dropdown">
                 <button
-                  className="dropdown-item"
-                  title="new"
-                  onClick={() => {
-                    const result = window.confirm('クリアします。よろしいですか？')
-
-                    if (!result) return
-
-                    canvasRef.current?.clear()
-                    const inputs = document.querySelectorAll(
-                      'input[name=filename]'
-                    ) as NodeListOf<HTMLInputElement>
-                    inputs.forEach((input) => {
-                      input.value = ''
-                      input.title = ''
-                    })
-                  }}
-                >
-                  {/* <i className="fa fa-file me-1" /> */}
-                  New
-                </button>
-              </li>
-              {/* open */}
-              <li>
-                <button
+                  className="btn btn-outline-secondary btn-sm dropdown-toggle me-2"
                   type="button"
-                  className="dropdown-item"
-                  title="file menu"
-                  data-bs-toggle="modal"
-                  data-bs-target="#file-modal"
-                  onClick={async () => {
-                    updateFileOperationMode(true)
-                    const files = await getFiles(user)
-                    updateFiles(files)
-                  }}
-                >
-                  {/* <i className="fa fa-folder" /> */}
-                  Open
-                </button>
-              </li>
-              {/* export */}
-              <li>
-                <button
-                  type="button"
-                  className="dropdown-item"
-                  title="export"
+                  data-bs-toggle="dropdown"
                   onClick={() => {
-                    let url
-
-                    try {
-                      url = ref.current?.toDataURL()
-                    } catch (error) {
-                      alert(`Error: ${JSON.stringify(error)}`)
-                      return
-                    }
-
-                    const input = document.querySelector('input[name=filename]') as HTMLInputElement
-                    const name = input.value
-
-                    if (!url || !name) return
-
-                    const a = document.createElement('a')
-                    a.href = url
-                    a.download = `${name}.png`
-                    a.click()
-                    a.remove()
+                    dropdownRef.current?.show()
                   }}
                 >
-                  {/* <i className="fa fa-download me-1" /> */}
-                  Export
+                  File
                 </button>
-              </li>
-            </ul>
-          </div>
+                <ul className="dropdown-menu">
+                  {/* new */}
+                  <li>
+                    <button
+                      className="dropdown-item"
+                      title="new"
+                      onClick={() => {
+                        const result = window.confirm('クリアします。よろしいですか？')
 
-          {/* file name */}
-          <input
-            type="text"
-            disabled
-            name="filename"
-            className="text-truncate me-2"
-            style={{ width: 160 }}
-          />
+                        if (!result) return
+
+                        canvasRef.current?.clear()
+                        const inputs = document.querySelectorAll(
+                          'input[name=filename]'
+                        ) as NodeListOf<HTMLInputElement>
+                        inputs.forEach((input) => {
+                          input.value = ''
+                          input.title = ''
+                        })
+                      }}
+                    >
+                      {/* <i className="fa fa-file me-1" /> */}
+                      New
+                    </button>
+                  </li>
+                  {/* open */}
+                  <li>
+                    <button
+                      type="button"
+                      className="dropdown-item"
+                      title="file menu"
+                      data-bs-toggle="modal"
+                      data-bs-target="#file-modal"
+                      onClick={async () => {
+                        updateFileOperationMode(true)
+                        const files = await getFiles(user)
+                        updateFiles(files)
+                      }}
+                    >
+                      {/* <i className="fa fa-folder" /> */}
+                      Open
+                    </button>
+                  </li>
+                  {/* export */}
+                  <li>
+                    <button
+                      type="button"
+                      className="dropdown-item"
+                      title="export"
+                      onClick={() => {
+                        let url
+
+                        try {
+                          url = ref.current?.toDataURL()
+                        } catch (error) {
+                          alert(`Error: ${JSON.stringify(error)}`)
+                          return
+                        }
+
+                        const input = document.querySelector(
+                          'input[name=filename]'
+                        ) as HTMLInputElement
+                        const name = input.value
+
+                        if (!url || !name) return
+
+                        const a = document.createElement('a')
+                        a.href = url
+                        a.download = `${name}.png`
+                        a.click()
+                        a.remove()
+                      }}
+                    >
+                      {/* <i className="fa fa-download me-1" /> */}
+                      Export
+                    </button>
+                  </li>
+                </ul>
+              </div>
+
+              {/* file name */}
+              <input
+                type="text"
+                disabled
+                name="filename"
+                className="text-truncate me-2"
+                style={{ width: 160 }}
+              />
+            </>
+          )}
 
           {/* zoom out */}
           <button
@@ -476,7 +489,7 @@ function App() {
         </div>
 
         <div className="d-flex">
-          {user.displayName ? (
+          {logined ? (
             <>
               {/* save */}
               <button
