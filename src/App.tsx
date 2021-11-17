@@ -1,4 +1,4 @@
-import { Fragment, useEffect, useRef, useState, KeyboardEvent } from 'react'
+import React, { Fragment, useEffect, useRef, useState, KeyboardEvent } from 'react'
 import firebase from 'firebase/app'
 import 'firebase/auth'
 import 'firebase/firestore'
@@ -10,7 +10,12 @@ import './App.css'
 import Canvas, { listenModification } from './Canvas'
 import { FileModal } from './components/FileModal'
 import { FileSummary, User } from './types'
-import { HEADER_HEIGHT, SCROLL_BAR_WIDTH, STORAGE_KEYS } from './constants/misc'
+import {
+  FABRIC_DATA_IN_CLIPBOARD,
+  HEADER_HEIGHT,
+  SCROLL_BAR_WIDTH,
+  STORAGE_KEYS,
+} from './constants/misc'
 import { getFiles, login, save } from './api'
 import { ConfigModal } from './components/ConfigModal'
 import { createHistoryInstance, getHistoryInstance } from './models/History'
@@ -18,6 +23,8 @@ import { upload } from './models/Upload'
 import { closeToast, initializeToast, openToast, Toast } from './components/Toast'
 import { IS_ANDROID, IS_IPAD, IS_IPHONE, IS_MAC, IS_TOUCH_DEVICE } from './util'
 import { ENV_VARS } from './models/EnvVars'
+import { getClipboard, handleCopy } from './models/handleCopy'
+import assert from 'assert'
 
 const { innerWidth, innerHeight } = window
 
@@ -53,15 +60,47 @@ const scrollBarWidth = IS_IPHONE || IS_IPAD || IS_ANDROID || IS_MAC ? 0 : SCROLL
 document.onpaste = async function (e: ClipboardEvent) {
   if (!e.clipboardData) return
 
-  const items = Array.from(e.clipboardData.items)
+  const items: DataTransferItem[] = Array.from(e.clipboardData.items)
 
   if (items.length === 0) {
     return
   }
 
-  const item: any = _.first(items)
+  const item: DataTransferItem = _.first(items) as DataTransferItem
+  assert(item)
 
   if (!item.type.startsWith('image')) {
+    const promise = new Promise<string>(function (resolve) {
+      item.getAsString(function (text) {
+        resolve(text)
+      })
+    })
+    const text = await promise
+
+    if (text.startsWith(FABRIC_DATA_IN_CLIPBOARD)) {
+      const { mousePos, editor }: any = global
+      const data = getClipboard()
+
+      data.clone(function (cloned: any) {
+        const left = mousePos.x
+        const top = mousePos.y + cloned.get('height') / 2
+
+        if (cloned.type === 'activeSelection') {
+          cloned.forEachObject(function (obj: any) {
+            // TODO もともとのオブジェクトの位置関係がくずれてしまう
+            obj.set({ left, top })
+            editor.add(obj)
+          })
+        } else {
+          cloned.set({ left, top })
+          editor.add(cloned)
+        }
+
+        editor.renderAll()
+      })
+      return
+    }
+
     return
   }
 
@@ -70,6 +109,8 @@ document.onpaste = async function (e: ClipboardEvent) {
   const { mousePos, editor, user }: any = global
 
   const blob = item.getAsFile()
+  assert(blob)
+
   const url = await upload(user.uid, Date.now().toFixed(), blob)
 
   const image = new fabric.Image()
@@ -140,6 +181,7 @@ function App() {
     }
 
     window.addEventListener('error', error)
+    document.addEventListener('copy', handleCopy)
 
     if (ENV_VARS.env === 'local') {
       return
@@ -430,6 +472,9 @@ function App() {
                 if (!inputRef.current || inputRef.current.style.width === '120px') return
                 textareaRef.current?.focus()
               }, 100)
+            }}
+            onPaste={(e: React.ClipboardEvent) => {
+              e.preventDefault()
             }}
           />
 

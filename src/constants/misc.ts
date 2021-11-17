@@ -13,3 +13,6 @@ export const STORAGE_KEYS = {
 export const HEADER_HEIGHT = 44
 
 export const SCROLL_BAR_WIDTH = 17
+
+// fabric data がコピーされたことをマークするための文字列
+export const FABRIC_DATA_IN_CLIPBOARD = 'FABRIC_DATA'
