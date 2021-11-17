@@ -30,7 +30,7 @@ ReactDOM.render(
   <React.StrictMode>
     <App />
   </React.StrictMode>,
-  document.getElementById('root')
+  document.getElementById('blink-board')
 )
 
 // If you want to start measuring performance in your app, pass a function

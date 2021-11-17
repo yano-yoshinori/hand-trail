@@ -9,7 +9,7 @@ import './App.css'
 import Canvas from './Canvas'
 import { FileModal } from './components/FileModal'
 import { FileSummary, User } from './types'
-import { SCROLL_BAR_WIDTH, STORAGE_KEYS } from './constants/misc'
+import { HEADER_HEIGHT, SCROLL_BAR_WIDTH, STORAGE_KEYS } from './constants/misc'
 import { getFiles, login, save } from './api'
 import { ConfigModal } from './components/ConfigModal'
 import { createHistoryInstance, getHistoryInstance } from './models/History'
@@ -128,7 +128,7 @@ function App() {
         className="px-2 d-flex justify-content-between align-items-center sticky-top"
         style={{
           width: '100%',
-          height: 44,
+          height: HEADER_HEIGHT,
           backgroundColor: '#333',
         }}
       >
@@ -138,7 +138,7 @@ function App() {
             <>
               <div className="dropdown">
                 <button
-                  className="btn btn-outline-secondary btn-sm dropdown-toggle me-2"
+                  className="btn btn-secondary btn-sm dropdown-toggle me-2"
                   type="button"
                   data-bs-toggle="dropdown"
                   onClick={() => {
@@ -229,7 +229,7 @@ function App() {
           {/* zoom out */}
           <button
             title="zoom out"
-            className="btn btn-outline-secondary btn-sm me-2"
+            className="btn btn-secondary btn-sm me-2"
             onClick={() => {
               if (zoomRef.current <= 0.5) return
 
@@ -243,7 +243,7 @@ function App() {
           {/* zoom reset */}
           <button
             title="zoom reset"
-            className="btn btn-outline-secondary btn-sm me-2"
+            className="btn btn-secondary btn-sm me-2"
             onClick={() => {
               if (zoomRef.current <= 0.5) return
 
@@ -257,7 +257,7 @@ function App() {
           {/* zoom in */}
           <button
             title="zoom in"
-            className="btn btn-outline-secondary btn-sm me-2"
+            className="btn btn-secondary btn-sm me-2"
             onClick={() => {
               if (zoomRef.current >= 2) return
 
@@ -271,7 +271,7 @@ function App() {
           {/* undo */}
           <button
             title="undo"
-            className="btn btn-outline-secondary btn-sm me-2"
+            className="btn btn-secondary btn-sm me-2"
             disabled={!undoEnabled}
             onClick={() => {
               const length = getHistoryInstance().undo()
@@ -282,7 +282,7 @@ function App() {
           </button>
 
           {/* colors */}
-          <div className="btn-group me-2">
+          <div className="me-2">
             {PAINT_COLORS.map(({ name, color }) => (
               <Fragment key={name}>
                 <input
@@ -299,8 +299,12 @@ function App() {
                 <label
                   htmlFor={`pen-color-${name}`}
                   title={name}
-                  className="btn btn-outline-secondary btn-sm"
-                  style={{ paddingLeft: '0.75rem', paddingRight: '0.75rem' }}
+                  className="btn btn-secondary btn-sm"
+                  style={{
+                    paddingLeft: '0.75rem',
+                    paddingRight: '0.75rem',
+                    borderColor: currentColor === color ? 'gray' : '#333',
+                  }}
                 >
                   <i className="fas fa-tint" style={{ color }} />
                 </label>
@@ -331,7 +335,7 @@ function App() {
               {/* trash */}
               <button
                 title="trash"
-                className="btn btn-outline-secondary btn-sm me-2"
+                className="btn btn-secondary btn-sm me-2"
                 onClick={() => {
                   const { editor }: any = global
 
@@ -442,7 +446,7 @@ function App() {
               {/* save */}
               <button
                 type="button"
-                className="btn btn-outline-primary btn-sm me-2"
+                className="btn btn-primary btn-sm me-2"
                 title="save"
                 onClick={() => {
                   save(user)
@@ -452,13 +456,13 @@ function App() {
                 <i className="fa fa-save" />
               </button>
               {/* user name */}
-              <span className="pt-1 me-2 text-white" title={user.displayName}>
+              <span className="pt-1 mx-2 text-white" title={user.displayName}>
                 {user.displayName.substr(0, 1)}
               </span>
               {/* config */}
               <button
                 type="button"
-                className="btn btn-outline-secondary btn-sm"
+                className="btn btn-secondary btn-sm"
                 title="config"
                 data-bs-toggle="modal"
                 data-bs-target="#config-modal"
@@ -472,7 +476,7 @@ function App() {
           ) : (
             <button
               type="button"
-              className="btn btn-outline-secondary btn-sm ms-2"
+              className="btn btn-secondary btn-sm ms-2"
               title="login"
               onClick={() => login(updateUser)}
             >
