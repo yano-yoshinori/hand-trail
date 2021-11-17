@@ -1,6 +1,7 @@
 import firebase from 'firebase/app'
 import 'firebase/auth'
 import 'firebase/firestore'
+import { writeFilename } from './models/FileName'
 import { User, File, FileSummary } from './types'
 
 export async function loadFile(name: string, uid: string) {
@@ -13,20 +14,16 @@ export async function loadFile(name: string, uid: string) {
   editor.clear()
   editor.loadFromJSON(JSON.parse(file.data))
 
-  const inputs = document.querySelectorAll('input[name=filename]') as NodeListOf<HTMLInputElement>
-  inputs.forEach((input) => {
-    input.value = doc.id
-    input.title = doc.id
-  })
+  writeFilename(doc.id)
 }
 
 export async function save(user: User) {
   const input = document.querySelector('#file-modal input[name=filename]') as HTMLInputElement
   const name = input.value
 
-  const inputInHeader = document.querySelector('header input[name=filename]') as HTMLInputElement
-  inputInHeader.value = name
-  inputInHeader.title = name
+  const filenameEl = document.querySelector('header .filename') as HTMLInputElement
+  filenameEl.textContent = name
+  filenameEl.title = name
 
   if (!name) {
     alert('ファイル名が入力されていません')

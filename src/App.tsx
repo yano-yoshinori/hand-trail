@@ -18,6 +18,7 @@ import { IS_ANDROID, IS_IPAD, IS_IPHONE, IS_MAC, IS_TOUCH_DEVICE } from './util'
 import { ENV_VARS } from './models/EnvVars'
 import { handleCopy } from './models/handleCopy'
 import { handlePaste } from './models/handlePaste'
+import { readFilename, writeFilename } from './models/FileName'
 
 const { innerWidth, innerHeight } = window
 
@@ -122,7 +123,7 @@ function App() {
   const logined = Boolean(user.displayName)
 
   return (
-    <div className="text-center">
+    <div>
       <header
         className="px-2 d-flex justify-content-between align-items-center sticky-top"
         style={{
@@ -133,7 +134,7 @@ function App() {
       >
         <div className="d-flex align-items-center">
           {/* file menu */}
-          {logined && (
+          {true && (
             <>
               <div className="dropdown">
                 <button
@@ -158,13 +159,7 @@ function App() {
                         if (!result) return
 
                         canvasRef.current?.clear()
-                        const inputs = document.querySelectorAll(
-                          'input[name=filename]'
-                        ) as NodeListOf<HTMLInputElement>
-                        inputs.forEach((input) => {
-                          input.value = ''
-                          input.title = ''
-                        })
+                        writeFilename('')
                       }}
                     >
                       {/* <i className="fa fa-file me-1" /> */}
@@ -205,10 +200,7 @@ function App() {
                           return
                         }
 
-                        const input = document.querySelector(
-                          'input[name=filename]'
-                        ) as HTMLInputElement
-                        const name = input.value
+                        const name = readFilename()
 
                         if (!url || !name) return
 
@@ -227,12 +219,9 @@ function App() {
               </div>
 
               {/* file name */}
-              <input
-                type="text"
-                disabled
-                name="filename"
-                className="text-truncate me-2"
-                style={{ width: 160 }}
+              <span
+                className="filename text-truncate text-center me-2"
+                style={{ width: 160, color: '#6c757d' }}
               />
             </>
           )}
@@ -423,7 +412,8 @@ function App() {
               }
 
               setTimeout(() => {
-                textareaRef.current?.focus()
+                // TODO バグるので一時的にコメントアウト
+                // textareaRef.current?.focus()
               })
             }}
             onKeyDown={(e: KeyboardEvent<HTMLInputElement>) => {
