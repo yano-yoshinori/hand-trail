@@ -3,28 +3,21 @@ import firebase from 'firebase/app'
 import 'firebase/auth'
 import 'firebase/firestore'
 import { fabric } from 'fabric'
-import _ from 'lodash'
 import { Dropdown } from 'bootstrap'
 
 import './App.css'
-import Canvas, { listenModification } from './Canvas'
+import Canvas from './Canvas'
 import { FileModal } from './components/FileModal'
 import { FileSummary, User } from './types'
-import {
-  FABRIC_DATA_IN_CLIPBOARD,
-  HEADER_HEIGHT,
-  SCROLL_BAR_WIDTH,
-  STORAGE_KEYS,
-} from './constants/misc'
+import { SCROLL_BAR_WIDTH, STORAGE_KEYS } from './constants/misc'
 import { getFiles, login, save } from './api'
 import { ConfigModal } from './components/ConfigModal'
 import { createHistoryInstance, getHistoryInstance } from './models/History'
-import { upload } from './models/Upload'
-import { closeToast, initializeToast, openToast, Toast } from './components/Toast'
+import { initializeToast, openToast, Toast } from './components/Toast'
 import { IS_ANDROID, IS_IPAD, IS_IPHONE, IS_MAC, IS_TOUCH_DEVICE } from './util'
 import { ENV_VARS } from './models/EnvVars'
-import { getClipboard, handleCopy } from './models/handleCopy'
-import assert from 'assert'
+import { handleCopy } from './models/handleCopy'
+import { handlePaste } from './models/handlePaste'
 
 const { innerWidth, innerHeight } = window
 
@@ -56,87 +49,6 @@ const PAINT_COLORS = [
 ] as const
 
 const scrollBarWidth = IS_IPHONE || IS_IPAD || IS_ANDROID || IS_MAC ? 0 : SCROLL_BAR_WIDTH
-
-document.onpaste = async function (e: ClipboardEvent) {
-  if (!e.clipboardData) return
-
-  const items: DataTransferItem[] = Array.from(e.clipboardData.items)
-
-  if (items.length === 0) {
-    return
-  }
-
-  const item: DataTransferItem = _.first(items) as DataTransferItem
-  assert(item)
-
-  if (!item.type.startsWith('image')) {
-    const promise = new Promise<string>(function (resolve) {
-      item.getAsString(function (text) {
-        resolve(text)
-      })
-    })
-    const text = await promise
-
-    if (text.startsWith(FABRIC_DATA_IN_CLIPBOARD)) {
-      const { mousePos, editor }: any = global
-      const data = getClipboard()
-
-      data.clone(function (cloned: any) {
-        const left = mousePos.x
-        const top = mousePos.y + cloned.get('height') / 2
-
-        if (cloned.type === 'activeSelection') {
-          cloned.forEachObject(function (obj: any) {
-            // TODO もともとのオブジェクトの位置関係がくずれてしまう
-            obj.set({ left, top })
-            editor.add(obj)
-          })
-        } else {
-          cloned.set({ left, top })
-          editor.add(cloned)
-        }
-
-        editor.renderAll()
-      })
-      return
-    }
-
-    return
-  }
-
-  openToast('Uploading...', false)
-
-  const { mousePos, editor, user }: any = global
-
-  const blob = item.getAsFile()
-  assert(blob)
-
-  const url = await upload(user.uid, Date.now().toFixed(), blob)
-
-  const image = new fabric.Image()
-  image.setSrc(
-    url,
-    function () {
-      image.set({
-        left: mousePos.x,
-        top: mousePos.y + HEADER_HEIGHT,
-        originX: 'center',
-        originY: 'center',
-      })
-      image.sendToBack()
-      editor.add(image)
-      editor.renderAll()
-      getHistoryInstance().push({ type: 'created', targets: [image] })
-      listenModification(image)
-
-      closeToast()
-    }
-    // これでは解決しなかった
-    // {
-    //   crossOrigin: 'anonymous',
-    // }
-  )
-}
 
 function App() {
   const ref = useRef<HTMLCanvasElement>(null)
@@ -182,6 +94,7 @@ function App() {
 
     window.addEventListener('error', error)
     document.addEventListener('copy', handleCopy)
+    document.addEventListener('paste', handlePaste)
 
     if (ENV_VARS.env === 'local') {
       return

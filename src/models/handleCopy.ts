@@ -20,9 +20,7 @@ export async function handleCopy() {
   }
 
   activeObject.clone(function (cloned: any) {
-    const { clipboard } = navigator
-
-    clipboard.writeText(FABRIC_DATA_IN_CLIPBOARD)
+    navigator.clipboard.writeText(FABRIC_DATA_IN_CLIPBOARD)
 
     setClipBoard(cloned)
   })
