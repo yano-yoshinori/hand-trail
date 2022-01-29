@@ -204,10 +204,12 @@ export default class Canvas {
     }
 
     document.addEventListener('keydown', (e) => {
+      const { key, ctrlKey, metaKey } = e
+
       if (
-        e.key === 'Delete' ||
+        key === 'Delete' ||
         // metaKey は keydown のときしかとれない
-        (e.key === 'Backspace' && e.metaKey)
+        (key === 'Backspace' && metaKey)
       ) {
         const items = editor.getActiveObjects()
         items.forEach((item) => {
@@ -215,6 +217,38 @@ export default class Canvas {
         })
         editor.discardActiveObject()
         return
+      }
+
+      if (ctrlKey && key === 'd') {
+        e.preventDefault()
+
+        const { editor } = global
+        const activeObject = editor.getActiveObject()
+
+        if (!activeObject) return
+
+        activeObject.clone(function (cloned) {
+          cloned.canvas = editor
+          editor.discardActiveObject()
+
+          if (cloned.type === 'activeSelection') {
+            // NOTE: active selection needs a reference to the canvas.
+            cloned.canvas = editor
+            cloned.forEachObject(function (obj) {
+              editor.add(obj)
+            })
+            // NOTE: this should solve the unselectability
+            cloned.setCoords()
+          } else {
+            editor.add(cloned)
+          }
+
+          cloned.top += 10
+          cloned.left += 10
+
+          editor.setActiveObject(cloned)
+          editor.requestRenderAll()
+        })
       }
 
       if (EXCLUDE_KEY_CODES.includes(e.code)) {

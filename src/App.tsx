@@ -90,7 +90,7 @@ function App() {
     window.addEventListener('resize', resize)
 
     function error(error: ErrorEvent) {
-      alert(`Error: ${JSON.stringify(error)}`)
+      console.error(`Error: ${JSON.stringify(error)}`)
     }
 
     window.addEventListener('error', error)

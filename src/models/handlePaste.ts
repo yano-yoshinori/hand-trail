@@ -34,48 +34,50 @@ export async function handlePaste(e: ClipboardEvent) {
       pasteText(text)
     }
   }
+}
 
-  async function pasteFabricObject() {
-    const { mousePos, editor }: any = global
-    const data = getClipboard()
+async function pasteFabricObject() {
+  const { mousePos, editor }: any = global
+  const data = getClipboard()
 
-    data.clone(function (cloned: any) {
-      const left = mousePos.x
-      const top = mousePos.y + cloned.get('height') / 2
+  data.clone(function (cloned: any) {
+    const left = mousePos.x
+    const top = mousePos.y + cloned.get('height') / 2
 
-      if (cloned.type === 'activeSelection') {
-        cloned.forEachObject(function (obj: any) {
-          // TODO もともとのオブジェクトの位置関係がくずれてしまう
-          obj.set({ left, top })
-          editor.add(obj)
-        })
-      } else {
-        cloned.set({ left, top })
-        editor.add(cloned)
-      }
+    if (cloned.type === 'activeSelection') {
+      // NOTE: active selection needs a reference to the canvas.
+      cloned.canvas = editor
+      cloned.forEachObject(function (obj: any) {
+        editor.add(obj)
+      })
+      // NOTE: this should solve the unselectability
+      cloned.setCoords()
+    } else {
+      editor.add(cloned)
+    }
 
-      editor.setActiveObject(cloned)
-      editor.renderAll()
-    })
-  }
+    cloned.set({ left, top })
+    editor.setActiveObject(cloned)
+    editor.renderAll()
+  })
+}
 
-  function pasteText(text: string) {
-    const { mousePos, editor }: any = global
+function pasteText(text: string) {
+  const { mousePos, editor }: any = global
 
-    const sFontSize = localStorage.getItem(STORAGE_KEYS.fontSize)
-    const fontSize = sFontSize ? Number(sFontSize) : DEFAULT_TEXT_SIZE
+  const sFontSize = localStorage.getItem(STORAGE_KEYS.fontSize)
+  const fontSize = sFontSize ? Number(sFontSize) : DEFAULT_TEXT_SIZE
 
-    const textbox = new fabric.Textbox(text, {
-      lockUniScaling: true,
-      hasControls: false, // TODO select mode にしたときは true にする
-      fill: editor.freeDrawingBrush.color,
-      fontSize,
-      // editable: false,
-      left: mousePos.x,
-      top: mousePos.y + HEADER_HEIGHT,
-    })
-    editor.add(textbox)
-  }
+  const textbox = new fabric.Textbox(text, {
+    lockUniScaling: true,
+    hasControls: false, // TODO select mode にしたときは true にする
+    fill: editor.freeDrawingBrush.color,
+    fontSize,
+    // editable: false,
+    left: mousePos.x,
+    top: mousePos.y + HEADER_HEIGHT,
+  })
+  editor.add(textbox)
 }
 
 async function pasteImage(item: DataTransferItem) {
