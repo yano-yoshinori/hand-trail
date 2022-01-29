@@ -53,8 +53,8 @@ const scrollBarWidth = IS_IPHONE || IS_IPAD || IS_ANDROID || IS_MAC ? 0 : SCROLL
 
 function App() {
   const ref = useRef<HTMLCanvasElement>(null)
-  const textareaRef = useRef<HTMLTextAreaElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
+  const repeatInputRef = useRef<HTMLInputElement>(null)
   const canvasRef = useRef<Canvas>()
   const [user, updateUser] = useState<User>({ uid: '', displayName: '' })
   const [files, updateFiles] = useState<FileSummary[]>([])
@@ -70,7 +70,7 @@ function App() {
       height: canvasHeight,
     })
 
-    textareaRef.current?.focus()
+    inputRef.current?.focus()
 
     createHistoryInstance((enabled: boolean) => {
       setUndoEnabled(enabled)
@@ -351,10 +351,10 @@ function App() {
             </>
           )}
 
-          <textarea
+          <input
             name="hiddenInput"
             hidden={IS_IPHONE || IS_IPAD || IS_ANDROID}
-            ref={textareaRef}
+            ref={inputRef}
             className="form-control form-control-sm me-2 bg-secondary text-white"
             // TODO 空のときは caret を transparent にする
             style={{
@@ -364,7 +364,7 @@ function App() {
               border: 'darkgray',
               resize: 'none',
             }}
-            onKeyDown={(e: KeyboardEvent<HTMLTextAreaElement>) => {
+            onKeyDown={(e: KeyboardEvent<HTMLInputElement>) => {
               const { key } = e
 
               if (key === 'Tab') {
@@ -375,8 +375,9 @@ function App() {
               if (fileOperationMode) return
 
               setTimeout(() => {
-                if (!inputRef.current || inputRef.current.style.width === '120px') return
-                textareaRef.current?.focus()
+                if (!repeatInputRef.current || repeatInputRef.current.style.width === '120px')
+                  return
+                inputRef.current?.focus()
               }, 100)
             }}
             onPaste={(e: React.ClipboardEvent) => {
@@ -387,14 +388,14 @@ function App() {
           {/* 連続射出 */}
           <input
             type="text"
-            ref={inputRef}
+            ref={repeatInputRef}
             placeholder="連続射出"
             title="連続射出"
             className="form-control form-control-sm me-2 bg-secondary text-white"
             style={{ width: 32 }}
             onFocus={() => {
-              if (inputRef.current) {
-                inputRef.current.style.width = '120px'
+              if (repeatInputRef.current) {
+                repeatInputRef.current.style.width = '120px'
               }
             }}
             // onBlur={() => {
@@ -411,8 +412,8 @@ function App() {
             onMouseOut={() => {
               textRepeat = 0
 
-              if (inputRef.current) {
-                inputRef.current.style.width = '32px'
+              if (repeatInputRef.current) {
+                repeatInputRef.current.style.width = '32px'
               }
 
               setTimeout(() => {
@@ -427,13 +428,13 @@ function App() {
                 e.preventDefault()
 
                 // テキスト射出
-                const point = new fabric.Point(inputRef.current?.offsetLeft ?? 0, 0)
-                canvasRef.current?.createTextbox(inputRef.current?.value, point, textRepeat)
+                const point = new fabric.Point(repeatInputRef.current?.offsetLeft ?? 0, 0)
+                canvasRef.current?.createTextbox(repeatInputRef.current?.value, point, textRepeat)
 
                 textRepeat += 1
 
-                if (inputRef.current) {
-                  inputRef.current.value = ''
+                if (repeatInputRef.current) {
+                  repeatInputRef.current.value = ''
                 }
               }
             }}
@@ -493,14 +494,14 @@ function App() {
         user={user}
         onClickClose={() => {
           updateFileOperationMode(false)
-          textareaRef.current?.focus()
+          inputRef.current?.focus()
           canvasRef.current?.addPixy()
         }}
       />
       <ConfigModal
         onClickClose={() => {
           updateFileOperationMode(false)
-          textareaRef.current?.focus()
+          inputRef.current?.focus()
           canvasRef.current?.addPixy()
         }}
       />

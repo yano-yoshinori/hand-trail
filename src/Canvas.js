@@ -192,7 +192,7 @@ export default class Canvas {
 
       getHistoryInstance().setLastValues(e.selected)
 
-      if (e.target.type === 'textbox') {
+      if (e.target.type === 'i-text') {
         isMoved = false
         lastText = e.target
 
@@ -330,7 +330,7 @@ export default class Canvas {
           textbox.set('text', text)
 
           // NOTE: 漢字変換前のひらがな入力でできた余白をなくすため
-          textbox.set('width', 0)
+          // textbox.set('width', 0)
         } else {
           editor.remove(lastText)
           lastText = null
@@ -465,7 +465,7 @@ export default class Canvas {
     const sFontSize = localStorage.getItem(STORAGE_KEYS.fontSize)
     const fontSize = sFontSize ? Number(sFontSize) : DEFAULT_TEXT_SIZE
 
-    const textbox = new fabric.Textbox(text, {
+    const textbox = new fabric.IText(text, {
       lockUniScaling: true,
       hasControls: false, // TODO select mode にしたときは true にする
       fill: editor.freeDrawingBrush.color,
