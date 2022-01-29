@@ -207,10 +207,13 @@ export default class Canvas {
       const { key, ctrlKey, metaKey } = e
 
       if (
-        key === 'Delete' ||
+        (ctrlKey && key === 'e') ||
+        (ctrlKey && key === 'Delete') ||
         // metaKey は keydown のときしかとれない
-        (key === 'Backspace' && metaKey)
+        (metaKey && key === 'Backspace')
       ) {
+        e.preventDefault()
+
         const items = editor.getActiveObjects()
         items.forEach((item) => {
           editor.remove(item)
@@ -311,6 +314,9 @@ export default class Canvas {
           isMoved = false
           textbox = this.createTextbox(text, mousePos)
           lastText = textbox
+
+          // NOTE: delete キーによる誤削除を防ぐ
+          // editor.discardActiveObject()
         }
       } else {
         if (text) {
@@ -351,7 +357,7 @@ export default class Canvas {
       // }
 
       if (this.modeIcon) {
-        this.modeIcon.set('left', mousePos.x + 5)
+        this.modeIcon.set('left', mousePos.x - 30)
         this.modeIcon.set('top', mousePos.y + 18)
       }
 
@@ -448,6 +454,13 @@ export default class Canvas {
     editor.zoomToPoint(point, value)
   }
 
+  /**
+   * createTextbox
+   * @param text
+   * @param mousePos
+   * @param rows 連続射出用
+   * @returns
+   */
   createTextbox(text, mousePos, rows) {
     const sFontSize = localStorage.getItem(STORAGE_KEYS.fontSize)
     const fontSize = sFontSize ? Number(sFontSize) : DEFAULT_TEXT_SIZE
@@ -466,7 +479,7 @@ export default class Canvas {
       point = new fabric.Point(mousePos.x, 30 + textbox.get('height') * 1.5 * rows)
     } else {
       point = mousePos
-      point.y += 46
+      point.y += 18
     }
 
     textbox.set({ left: point.x + 2, top: point.y })
