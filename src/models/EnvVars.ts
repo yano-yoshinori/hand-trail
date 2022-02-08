@@ -6,6 +6,7 @@ const {
   REACT_APP_FIREBASE_MESSAGING_SENDER_ID,
   REACT_APP_FIREBASE_APP_ID,
   REACT_APP_ENV,
+  REACT_APP_NEW_CANVAS,
 } = process.env
 
 export const ENV_VARS = {
@@ -16,4 +17,5 @@ export const ENV_VARS = {
   firebaseMessagingSenderId: REACT_APP_FIREBASE_MESSAGING_SENDER_ID,
   firebaseAppId: REACT_APP_FIREBASE_APP_ID,
   env: REACT_APP_ENV,
+  newCanvas: REACT_APP_NEW_CANVAS === 'true',
 } as const

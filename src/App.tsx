@@ -19,6 +19,8 @@ import { ENV_VARS } from './models/EnvVars'
 import { handleCopy } from './models/handleCopy'
 import { handlePaste } from './models/handlePaste'
 import { readFilename, writeFilename } from './models/FileName'
+import { Canvas as NewCanvas } from './fabric-components/canvas/Canvas'
+import assert from 'assert'
 
 const { innerWidth, innerHeight } = window
 
@@ -55,7 +57,7 @@ function App() {
   const ref = useRef<HTMLCanvasElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
   const repeatInputRef = useRef<HTMLInputElement>(null)
-  const canvasRef = useRef<Canvas>()
+  const canvasRef = useRef<Canvas | NewCanvas>()
   const [user, updateUser] = useState<User>({ uid: '', displayName: '' })
   const [files, updateFiles] = useState<FileSummary[]>([])
   const [currentColor, setCurrentColor] = useState<string>('white')
@@ -65,7 +67,10 @@ function App() {
   const dropdownRef = useRef<Dropdown>()
 
   useEffect(() => {
-    canvasRef.current = new Canvas(ref.current, {
+    assert(ref.current)
+
+    const CanvasClass = ENV_VARS.newCanvas ? NewCanvas : Canvas
+    canvasRef.current = new CanvasClass(ref.current, {
       width: innerWidth - scrollBarWidth,
       height: canvasHeight,
     })
@@ -221,7 +226,7 @@ function App() {
               {/* file name */}
               <span
                 className="filename text-truncate text-center me-2"
-                style={{ width: 160, color: '#6c757d' }}
+                style={{ width: IS_TOUCH_DEVICE ? 120 : 160, color: '#6c757d' }}
               />
             </>
           )}
@@ -358,7 +363,7 @@ function App() {
             className="form-control form-control-sm me-2 bg-secondary text-white"
             // TODO 空のときは caret を transparent にする
             style={{
-              width: 200,
+              width: IS_TOUCH_DEVICE ? 160 : 200,
               height: '1rem',
               caretColor: 'lightgray',
               border: 'darkgray',

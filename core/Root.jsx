@@ -16,7 +16,7 @@ class Root extends React.Component {
             <div>
                 <Header />
                 <div id="1" className="editor-outer">
-                    <canvas className="editor" style={{ overfloe: 'hidden' }}></canvas>
+                    <canvas className="editor" style={{ overflow: 'hidden' }}></canvas>
                 </div>
                 {/*
                 <div style={this.state.pixy}>
