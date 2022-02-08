@@ -220,9 +220,7 @@ export default class Canvas {
         })
         editor.discardActiveObject()
         return
-      }
-
-      if (ctrlKey && key === 'd') {
+      } else if (ctrlKey && key === 'd') {
         e.preventDefault()
 
         const { editor } = global
@@ -246,12 +244,20 @@ export default class Canvas {
             editor.add(cloned)
           }
 
-          cloned.top += 10
-          cloned.left += 10
+          cloned.top += 20
+          cloned.left += 20
 
           editor.setActiveObject(cloned)
           editor.requestRenderAll()
         })
+      } else if (key === 'Enter') {
+        document.querySelector('[name=hiddenInput]').value = ''
+
+        lastText = this.createTextbox('', mousePos)
+
+        lastTextPos.x = mousePos.x
+        lastTextPos.y = mousePos.y
+        return
       }
 
       if (EXCLUDE_KEY_CODES.includes(e.code)) {
@@ -328,12 +334,14 @@ export default class Canvas {
 
           textbox = lastText
           textbox.set('text', text)
+          editor.setActiveObject(textbox)
 
           // NOTE: 漢字変換前のひらがな入力でできた余白をなくすため
           // textbox.set('width', 0)
         } else {
-          editor.remove(lastText)
-          lastText = null
+          // editor.setActiveObject(lastText)
+          // editor.remove(lastText)
+          // lastText = null
         }
         // text.set('text', text.get('text') + char)
         //text.insertChars(char);
@@ -471,6 +479,9 @@ export default class Canvas {
       fill: editor.freeDrawingBrush.color,
       fontSize,
       // editable: false,
+    }).on('mouseover', () => {
+      // TODO オブジェクトを選択中にしたい
+      // editor.setActiveObject(textbox)
     })
 
     let point
