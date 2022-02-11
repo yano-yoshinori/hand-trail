@@ -17,7 +17,7 @@ export async function loadFile(name: string, uid: string) {
   writeFilename(doc.id)
 }
 
-export async function save(user: User) {
+export async function save(user: User): Promise<boolean> {
   const input = document.querySelector('#file-modal input[name=filename]') as HTMLInputElement
   const name = input.value
 
@@ -27,7 +27,7 @@ export async function save(user: User) {
 
   if (!name) {
     alert('ファイル名が入力されていません')
-    return
+    return false
   }
 
   const db = firebase.firestore()
@@ -40,6 +40,8 @@ export async function save(user: User) {
       date: new Date(),
       data: JSON.stringify(editor.toJSON()),
     })
+
+  return true
 }
 
 export function login(updateUser: (user: User) => void) {

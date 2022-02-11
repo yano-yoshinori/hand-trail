@@ -10,7 +10,7 @@ import Canvas from './Canvas'
 import { FileModal } from './components/FileModal'
 import { FileSummary, User } from './types'
 import { HEADER_HEIGHT, SCROLL_BAR_WIDTH, STORAGE_KEYS } from './constants/misc'
-import { getFiles, login, save } from './api'
+import { getFiles, loadFile, login, save } from './api'
 import { ConfigModal } from './components/ConfigModal'
 import { createHistoryInstance, getHistoryInstance } from './models/History'
 import { initializeToast, openToast, Toast } from './components/Toast'
@@ -65,6 +65,16 @@ function App() {
   const [undoEnabled, setUndoEnabled] = useState(false)
   const zoomRef = useRef(1)
   const dropdownRef = useRef<Dropdown>()
+
+  const handleClickSave = async () => {
+    const result = await save(user)
+    if (!result) return
+
+    getHistoryInstance().clear()
+    setUndoEnabled(false)
+
+    openToast('保存しました')
+  }
 
   useEffect(() => {
     assert(ref.current)
@@ -163,6 +173,8 @@ function App() {
 
                         if (!result) return
 
+                        getHistoryInstance().clear()
+                        setUndoEnabled(false)
                         canvasRef.current?.clear()
                         writeFilename('')
                       }}
@@ -391,59 +403,61 @@ function App() {
           />
 
           {/* 連続射出 */}
-          <input
-            type="text"
-            ref={repeatInputRef}
-            placeholder="連続射出"
-            title="連続射出"
-            className="form-control form-control-sm me-2 bg-secondary text-white"
-            style={{ width: 32 }}
-            onFocus={() => {
-              if (repeatInputRef.current) {
-                repeatInputRef.current.style.width = '120px'
-              }
-            }}
-            // onBlur={() => {
-            //   textRepeat = 0
+          {IS_TOUCH_DEVICE && (
+            <input
+              type="text"
+              ref={repeatInputRef}
+              placeholder="連続射出"
+              title="連続射出"
+              className="form-control form-control-sm me-2 bg-secondary text-white"
+              style={{ width: 32 }}
+              onFocus={() => {
+                if (repeatInputRef.current) {
+                  repeatInputRef.current.style.width = '120px'
+                }
+              }}
+              // onBlur={() => {
+              //   textRepeat = 0
 
-            //   if (inputRef.current) {
-            //     inputRef.current.size = 1
-            //   }
+              //   if (inputRef.current) {
+              //     inputRef.current.size = 1
+              //   }
 
-            //   setTimeout(() => {
-            //     textareaRef.current?.focus()
-            //   })
-            // }}
-            onMouseOut={() => {
-              textRepeat = 0
-
-              if (repeatInputRef.current) {
-                repeatInputRef.current.style.width = '32px'
-              }
-
-              setTimeout(() => {
-                // TODO バグるので一時的にコメントアウト
-                // textareaRef.current?.focus()
-              })
-            }}
-            onKeyDown={(e: KeyboardEvent<HTMLInputElement>) => {
-              const { key } = e
-
-              if (key === 'Enter') {
-                e.preventDefault()
-
-                // テキスト射出
-                const point = new fabric.Point(repeatInputRef.current?.offsetLeft ?? 0, 0)
-                canvasRef.current?.createTextbox(repeatInputRef.current?.value, point, textRepeat)
-
-                textRepeat += 1
+              //   setTimeout(() => {
+              //     textareaRef.current?.focus()
+              //   })
+              // }}
+              onMouseOut={() => {
+                textRepeat = 0
 
                 if (repeatInputRef.current) {
-                  repeatInputRef.current.value = ''
+                  repeatInputRef.current.style.width = '32px'
                 }
-              }
-            }}
-          />
+
+                setTimeout(() => {
+                  // TODO バグるので一時的にコメントアウト
+                  // textareaRef.current?.focus()
+                })
+              }}
+              onKeyDown={(e: KeyboardEvent<HTMLInputElement>) => {
+                const { key } = e
+
+                if (key === 'Enter') {
+                  e.preventDefault()
+
+                  // テキスト射出
+                  const point = new fabric.Point(repeatInputRef.current?.offsetLeft ?? 0, 0)
+                  canvasRef.current?.createTextbox(repeatInputRef.current?.value, point, textRepeat)
+
+                  textRepeat += 1
+
+                  if (repeatInputRef.current) {
+                    repeatInputRef.current.value = ''
+                  }
+                }
+              }}
+            />
+          )}
         </div>
 
         <div className="d-flex">
@@ -452,12 +466,10 @@ function App() {
               {/* save */}
               <button
                 type="button"
-                className="btn btn-primary btn-sm me-2"
+                className={`btn ${undoEnabled ? 'btn-primary' : 'btn-secondary'} btn-sm me-2`}
                 title="save"
-                onClick={() => {
-                  save(user)
-                  openToast('保存しました')
-                }}
+                disabled={!undoEnabled}
+                onClick={handleClickSave}
               >
                 <i className="fa fa-save" />
               </button>
@@ -501,6 +513,12 @@ function App() {
           updateFileOperationMode(false)
           inputRef.current?.focus()
           canvasRef.current?.addPixy()
+        }}
+        onClickSave={handleClickSave}
+        onClickOpen={(name) => {
+          loadFile(name, user.uid)
+          getHistoryInstance().clear()
+          setUndoEnabled(false)
         }}
       />
       <ConfigModal

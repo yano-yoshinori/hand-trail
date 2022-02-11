@@ -1,15 +1,15 @@
-import { loadFile, save } from '../api'
 import { FileSummary, User } from '../types'
 import { formatDate } from '../util'
-import { openToast } from './Toast'
 
 interface Props {
   files: FileSummary[]
   user: User
   onClickClose: () => void
+  onClickSave: () => void
+  onClickOpen: (name: string) => void
 }
 
-export const FileModal = ({ files, user, onClickClose }: Props) => {
+export const FileModal = ({ files, user, onClickClose, onClickSave, onClickOpen }: Props) => {
   return (
     <div id="file-modal" tabIndex={-1} className="modal fade">
       <div className="modal-dialog me-3">
@@ -36,11 +36,7 @@ export const FileModal = ({ files, user, onClickClose }: Props) => {
                 className="btn btn-primary btn-sm"
                 title="save"
                 data-bs-dismiss="modal"
-                onClick={() => {
-                  save(user)
-                  onClickClose()
-                  openToast('保存しました')
-                }}
+                onClick={onClickSave}
               >
                 <i className="fa fa-save" />
               </button>
@@ -56,9 +52,7 @@ export const FileModal = ({ files, user, onClickClose }: Props) => {
                   key={name}
                   type="button"
                   className="list-group-item list-group-item-action"
-                  onClick={() => {
-                    loadFile(name, user.uid)
-                  }}
+                  onClick={() => onClickOpen(name)}
                 >
                   <div className="d-flex justify-content-between">
                     <span>{name}</span>

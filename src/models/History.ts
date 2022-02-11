@@ -32,6 +32,10 @@ class Histories {
     this.callback(this.items.length > 0)
   }
 
+  clear() {
+    this.items.length = 0
+  }
+
   setLastValues(objects: fabric.Object[]) {
     this.lastValues = objects.map((object) => {
       return {
