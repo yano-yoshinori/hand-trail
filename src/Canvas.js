@@ -444,7 +444,7 @@ export default class Canvas {
     objects.forEach((object) => {
       if (['line', 'path'].includes(object.type)) {
         object.set('stroke', color)
-      } else if (object.type === 'textbox') {
+      } else if (object.type === 'i-text') {
         object.set('fill', color)
       }
     })

@@ -95,7 +95,7 @@ class Histories {
 
           if (['line', 'path'].includes(target.type)) {
             target.set('stroke', lastValue as string)
-          } else if (target.type === 'textbox') {
+          } else if (target.type === 'i-text') {
             target.set('fill', lastValue as string)
           }
         })
