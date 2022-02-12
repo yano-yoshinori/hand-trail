@@ -18,13 +18,17 @@ interface LastValue {
 type Callback = (enabled: boolean) => void
 
 class Histories {
-  items: History[] = []
+  private items: History[] = []
   // cursor: number = 0
   lastValues: LastValue[] = []
   callback: Callback
 
   constructor(callback: Callback) {
     this.callback = callback
+  }
+
+  hasHistory(): boolean {
+    return this.items.length > 0
   }
 
   push(item: History) {

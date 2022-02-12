@@ -109,6 +109,14 @@ function App() {
     }
 
     window.addEventListener('error', error)
+    window.addEventListener('beforeunload', (e: BeforeUnloadEvent) => {
+      if (getHistoryInstance().hasHistory()) {
+        e.preventDefault() // If you prevent default behavior in Mozilla Firefox prompt will always be shown
+        // // Chrome requires returnValue to be set
+        e.returnValue = ''
+      }
+    })
+
     document.addEventListener('copy', handleCopy)
     document.addEventListener('paste', handlePaste)
 
