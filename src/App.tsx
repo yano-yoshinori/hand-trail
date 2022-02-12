@@ -392,7 +392,10 @@ function App() {
               if (fileOperationMode) return
 
               setTimeout(() => {
-                if (!repeatInputRef.current || repeatInputRef.current.style.width === '120px')
+                if (
+                  IS_TOUCH_DEVICE &&
+                  (!repeatInputRef.current || repeatInputRef.current.style.width === '120px')
+                )
                   return
                 inputRef.current?.focus()
               }, 100)
