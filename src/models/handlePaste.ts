@@ -80,6 +80,10 @@ function pasteText(text: string) {
   editor.add(textbox)
 }
 
+interface ImageEx extends fabric.Image {
+  imageSmoothing: boolean
+}
+
 async function pasteImage(item: DataTransferItem) {
   openToast('Uploading...', false)
 
@@ -90,7 +94,7 @@ async function pasteImage(item: DataTransferItem) {
 
   const url = await upload(user.uid, Date.now().toFixed(), blob)
 
-  const image = new fabric.Image()
+  const image = new fabric.Image() as ImageEx
   image.setSrc(
     url,
     function () {
@@ -100,6 +104,7 @@ async function pasteImage(item: DataTransferItem) {
         originX: 'center',
         originY: 'center',
       })
+      image.imageSmoothing = false
       image.sendToBack()
       editor.add(image)
       editor.renderAll()

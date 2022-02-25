@@ -2,7 +2,12 @@ import _ from 'lodash'
 import { fabric } from 'fabric'
 
 import FabricCanvas from './fabric-components/FabricCanvas'
-import { DEFAULT_TEXT_SIZE, STORAGE_KEYS, STRAIGHT_LINE_THRESHOLD } from './constants/misc'
+import {
+  DEFAULT_TEXT_SIZE,
+  STORAGE_KEYS,
+  STRAIGHT_LINE_THRESHOLD,
+  FABRIC_CANVAS_OPTIONS,
+} from './constants/misc'
 import { createListen, getHistoryInstance } from './models/History'
 import { IS_TOUCH_DEVICE } from './util'
 
@@ -37,14 +42,6 @@ let editor
 // 文字をにじませないようにする
 // ref: https://github.com/fabricjs/fabric.js/issues/4113#issuecomment-316644627
 fabric.devicePixelRatio = 2
-
-const FABRIC_CANVAS_OPTIONS = {
-  isDrawingMode: true,
-  selectionFullyContained: true,
-  backgroundColor: '#545554',
-  // imageSmoothingEnabled: true,
-  // allowTouchScrolling: IS_IPAD || IS_ANDROID,
-}
 
 const FREE_DRAWING_BRUSH_PROPS = {
   color: 'white',

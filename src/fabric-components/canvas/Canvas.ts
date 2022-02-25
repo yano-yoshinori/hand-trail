@@ -1,12 +1,5 @@
 import { fabric } from 'fabric'
-
-const FABRIC_CANVAS_OPTIONS = {
-  isDrawingMode: true,
-  selectionFullyContained: true,
-  backgroundColor: '#545554',
-  // imageSmoothingEnabled: true,
-  // allowTouchScrolling: IS_IPAD || IS_ANDROID,
-}
+import { FABRIC_CANVAS_OPTIONS } from '../../constants/misc'
 
 export class Canvas {
   private fabricCanvas: fabric.Canvas
