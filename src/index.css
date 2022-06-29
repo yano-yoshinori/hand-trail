@@ -13,3 +13,7 @@ code {
 canvas {
   image-rendering: pixelated;
 }
+
+#app .modal-backdrop.show{
+  opacity: 0;
+}

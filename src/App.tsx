@@ -3,7 +3,7 @@ import firebase from 'firebase/app'
 import 'firebase/auth'
 import 'firebase/firestore'
 import { fabric } from 'fabric'
-import { Dropdown } from 'bootstrap'
+import { Dropdown, Modal } from 'bootstrap'
 
 import './App.css'
 import Canvas from './Canvas'
@@ -200,9 +200,13 @@ function App() {
                       type="button"
                       className="dropdown-item"
                       title="file menu"
-                      data-bs-toggle="modal"
-                      data-bs-target="#file-modal"
+                      // NOTE: これだと modal-backdrop が2つ作られてしまう
+                      // data-bs-toggle="modal"
+                      // data-bs-target="#file-modal"
                       onClick={async () => {
+                        const modal = new Modal('#file-modal')
+                        modal.show()
+
                         updateFileOperationMode(true)
                         const files = await getFiles(user)
                         updateFiles(files)
@@ -500,9 +504,12 @@ function App() {
                 type="button"
                 className="btn btn-secondary btn-sm"
                 title="config"
-                data-bs-toggle="modal"
-                data-bs-target="#config-modal"
+                // data-bs-toggle="modal"
+                // data-bs-target="#config-modal"
                 onClick={() => {
+                  const modal = new Modal('#config-modal')
+                  modal.show()
+
                   updateFileOperationMode(true)
                 }}
               >
