@@ -1,4 +1,5 @@
 export const DEFAULT_TEXT_SIZE = 18
+export const DEFAULT_HEIGHT = window.innerHeight * 2
 
 // 直線にするかフリーハンドにするかの閾値
 export const STRAIGHT_LINE_THRESHOLD = 5

@@ -9,7 +9,7 @@ import './App.css'
 import Canvas from './Canvas'
 import { FileModal } from './components/FileModal'
 import { FileSummary, User } from './types'
-import { HEADER_HEIGHT, SCROLL_BAR_WIDTH, STORAGE_KEYS } from './constants/misc'
+import { DEFAULT_HEIGHT, HEADER_HEIGHT, SCROLL_BAR_WIDTH, STORAGE_KEYS } from './constants/misc'
 import { getFiles, loadFile, login, save } from './api'
 import { ConfigModal } from './components/ConfigModal'
 import { createHistoryInstance, getHistoryInstance } from './models/History'
@@ -27,7 +27,7 @@ const { innerWidth, innerHeight } = window
 // const canvasWidth = innerWidth < MIN_RESOLUTION.width ? MIN_RESOLUTION.width : innerWidth
 
 const sCanvasHeight = localStorage.getItem(STORAGE_KEYS.canvasHeight)
-const canvasHeight = sCanvasHeight ? Number(sCanvasHeight) : innerHeight
+const canvasHeight = sCanvasHeight ? Number(sCanvasHeight) : DEFAULT_HEIGHT
 
 // 連続射出機能
 let textRepeat = 0
@@ -72,6 +72,9 @@ function App() {
 
     getHistoryInstance().clear()
     setUndoEnabled(false)
+
+    updateFileOperationMode(false)
+    inputRef.current?.focus()
 
     openToast('保存しました')
   }
@@ -477,9 +480,13 @@ function App() {
               {/* save */}
               <button
                 type="button"
-                className={`btn ${undoEnabled ? 'btn-primary' : 'btn-secondary'} btn-sm me-2`}
+                className={`btn ${
+                  undoEnabled && document.querySelector('header .filename')?.textContent
+                    ? 'btn-primary'
+                    : 'btn-secondary'
+                } btn-sm me-2`}
                 title="save"
-                disabled={!undoEnabled}
+                disabled={!undoEnabled || !document.querySelector('header .filename')?.textContent}
                 onClick={handleClickSave}
               >
                 <i className="fa fa-save" />

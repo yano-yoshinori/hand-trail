@@ -11,7 +11,13 @@ interface Props {
 
 export const FileModal = ({ files, user, onClickClose, onClickSave, onClickOpen }: Props) => {
   return (
-    <div id="file-modal" tabIndex={-1} className="modal fade">
+    <div
+      id="file-modal"
+      tabIndex={-1}
+      className="modal fade"
+      data-bs-backdrop="static"
+      data-bs-keyboard="false"
+    >
       <div className="modal-dialog me-3">
         <div className="modal-content">
           <div className="modal-header">

@@ -123,7 +123,7 @@ export default class Canvas {
       // TODO これをすると最後のオブジェクトを削除が動かなくなる
       // path.sendToBack()
 
-      if (localStorage.getItem(STORAGE_KEYS.perPixelTargetFind) === 'true') {
+      if (['true', null].includes(localStorage.getItem(STORAGE_KEYS.perPixelTargetFind))) {
         path.perPixelTargetFind = true
 
         path.on('mouseover', function () {

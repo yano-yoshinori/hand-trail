@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { DEFAULT_TEXT_SIZE, STORAGE_KEYS } from '../constants/misc'
+import { DEFAULT_HEIGHT, DEFAULT_TEXT_SIZE, STORAGE_KEYS } from '../constants/misc'
 
 const { localStorage } = window
 
@@ -8,7 +8,7 @@ interface Props {
 }
 
 export const ConfigModal = ({ onClickClose }: Props) => {
-  const usePerPixelTargetFind = localStorage.getItem(STORAGE_KEYS.perPixelTargetFind) ?? 'false'
+  const usePerPixelTargetFind = localStorage.getItem(STORAGE_KEYS.perPixelTargetFind) ?? 'true'
   const [selectionMode, setSelectionMode] = useState<boolean>(usePerPixelTargetFind === 'true')
 
   const sFontSize = localStorage.getItem(STORAGE_KEYS.fontSize)
@@ -16,11 +16,17 @@ export const ConfigModal = ({ onClickClose }: Props) => {
   const [fontSize, setFontSize] = useState(defaultFontSize)
 
   const sCanvasHeight = localStorage.getItem(STORAGE_KEYS.canvasHeight)
-  const defaultCanvasHeight = sCanvasHeight ? Number(sCanvasHeight) : window.innerHeight
+  const defaultCanvasHeight = sCanvasHeight ? Number(sCanvasHeight) : DEFAULT_HEIGHT
   const [canvasHeight, setCanvasHeight] = useState(defaultCanvasHeight)
 
   return (
-    <div id="config-modal" className="modal fade" tabIndex={-1}>
+    <div
+      id="config-modal"
+      className="modal fade"
+      tabIndex={-1}
+      data-bs-backdrop="static"
+      data-bs-keyboard="false"
+    >
       <div className="modal-dialog">
         <div className="modal-content">
           <div className="modal-header">
