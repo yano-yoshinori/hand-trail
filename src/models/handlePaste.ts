@@ -13,6 +13,7 @@ import { getClipboard } from './handleCopy'
 import { upload } from './Upload'
 import { getHistoryInstance } from './History'
 import { listenModification } from '../Canvas'
+import { assert } from '../assert'
 
 export async function handlePaste(e: ClipboardEvent) {
   if (!e.clipboardData) return

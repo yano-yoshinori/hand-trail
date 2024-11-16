@@ -20,7 +20,7 @@ import { handleCopy } from './models/handleCopy'
 import { handlePaste } from './models/handlePaste'
 import { readFilename, writeFilename } from './models/FileName'
 import { Canvas as NewCanvas } from './fabric-components/canvas/Canvas'
-import assert from 'assert'
+import { assert } from './assert'
 
 const { innerWidth, innerHeight } = window
 
