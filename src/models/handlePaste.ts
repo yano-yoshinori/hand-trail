@@ -1,4 +1,3 @@
-import assert from 'assert'
 import { fabric } from 'fabric'
 import _ from 'lodash'
 
@@ -95,7 +94,8 @@ async function pasteImage(item: DataTransferItem) {
 
   const url = await upload(user.uid, Date.now().toFixed(), blob)
 
-  const image = new fabric.Image() as ImageEx
+  const imageEl = document.createElement('image') as HTMLImageElement
+  const image = new fabric.Image(imageEl) as ImageEx
   image.setSrc(
     url,
     function () {
